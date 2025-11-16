@@ -5,11 +5,15 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import com.longtapcode.identity_service.dto.request.UpdateUserRequest;
+import com.longtapcode.identity_service.dto.response.UserResponse;
+import com.longtapcode.identity_service.mapper.UserMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,6 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
     UserRepository userRepository;
+    UserMapper userMapper;
     RefreshTokenRepository refreshTokenRepository;
 
     @NonFinal
@@ -160,6 +165,27 @@ public class AuthenticationService {
         res.addHeader("Set-Cookie", cookie.toString());
     }
 
+    public void clearRefreshTokenCookie(HttpServletResponse res) {
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .secure(false)
+                .build();
+        res.addHeader("Set-Cookie", cookie.toString());
+    }
+
+    public void logOut (HttpServletResponse res,AuthenticationRequest request){
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+        if(userName.equals(request.getUserName())) {
+            logOutToken(request);
+            clearRefreshTokenCookie(res);
+        }
+    }
+
+
     public String extractRefreshToken(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -169,5 +195,23 @@ public class AuthenticationService {
             }
         }
         return null;
+    }
+
+    public UserResponse getMyInfo(){
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+        User user = userRepository.findByUserName(userName).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userMapper.toUserResponse(user);
+    }
+
+    public void updateMyInfo(UpdateUserRequest request){
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+        if(userName.equals(request.getUserName())){
+            User user = userRepository.findByUserName(userName).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
+            userMapper.updateUser(user,request);
+            userRepository.save(user);
+        }
+
     }
 }
