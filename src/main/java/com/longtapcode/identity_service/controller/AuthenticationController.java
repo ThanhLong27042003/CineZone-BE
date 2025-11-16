@@ -2,14 +2,13 @@ package com.longtapcode.identity_service.controller;
 
 import java.text.ParseException;
 
+import com.longtapcode.identity_service.dto.request.UpdateUserRequest;
+import com.longtapcode.identity_service.dto.response.UserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.longtapcode.identity_service.dto.request.ApiResponse;
 import com.longtapcode.identity_service.dto.request.AuthenticationRequest;
@@ -36,6 +35,13 @@ public class AuthenticationController {
                 .result(authenticationService.logIn(res,request))
                 .build();
     }
+    @PostMapping("/log-out")
+    public ApiResponse<?> logOut(HttpServletResponse res, @RequestBody @Valid AuthenticationRequest request) {
+        authenticationService.logOut(res,request);
+        return ApiResponse.<String>builder()
+                .result("User loged out!!")
+                .build();
+    }
 
 
     @PostMapping("/refreshToken")
@@ -44,6 +50,21 @@ public class AuthenticationController {
         String refreshToken = authenticationService.extractRefreshToken(req);
         return ApiResponse.<RefreshTokenResponse>builder()
                 .result(authenticationService.refreshToken(refreshToken))
+                .build();
+    }
+
+    @GetMapping("/me")
+    public ApiResponse<UserResponse> getMyInfo(){
+        return ApiResponse.<UserResponse>builder()
+                .result(authenticationService.getMyInfo())
+                .build();
+    }
+
+    @PostMapping("/update/me")
+    public ApiResponse<?> updateMyInfo(@RequestBody UpdateUserRequest request){
+        authenticationService.updateMyInfo(request);
+        return ApiResponse.<String>builder()
+                .result("Profile updated successfully! ✅")
                 .build();
     }
 }

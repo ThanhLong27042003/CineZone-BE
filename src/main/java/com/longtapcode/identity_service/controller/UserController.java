@@ -66,10 +66,6 @@ public class UserController {
         userService.deleteUser(id);
         return ApiResponse.<String>builder().result("Delete user successful!").build();
     }
-    @GetMapping("/me")
-    public ApiResponse<UserResponse> getMyInfo(){
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.getMyInfo())
-        .build();
-    }
+
+
 }
