@@ -26,7 +26,8 @@ public enum ErrorCode {
     MOVIE_EXISTED(1012,"Movie already exists",HttpStatus.BAD_REQUEST),
     SHOW_NOT_EXISTED(1013,"Show is not existed",HttpStatus.BAD_REQUEST),
     SHOW_EXISTED(1014,"Show already exists",HttpStatus.BAD_REQUEST),
-    SEAT_NOT_EXISTED(1015, "Seat is not existed", HttpStatus.BAD_REQUEST);
+    SEAT_NOT_EXISTED(1015, "Seat is not existed", HttpStatus.BAD_REQUEST),
+    INCORRECT_PASSWORD(1016,"The password is incorrect. Please try again!",HttpStatus.BAD_REQUEST);
     final int code;
     final String message;
     final HttpStatus statusCode;

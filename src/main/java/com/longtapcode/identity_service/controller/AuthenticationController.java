@@ -2,7 +2,7 @@ package com.longtapcode.identity_service.controller;
 
 import java.text.ParseException;
 
-import com.longtapcode.identity_service.dto.request.UpdateUserRequest;
+import com.longtapcode.identity_service.dto.request.*;
 import com.longtapcode.identity_service.dto.response.UserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,9 +10,6 @@ import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.longtapcode.identity_service.dto.request.ApiResponse;
-import com.longtapcode.identity_service.dto.request.AuthenticationRequest;
-import com.longtapcode.identity_service.dto.request.VerifyRequest;
 import com.longtapcode.identity_service.dto.response.AuthenticationResponse;
 import com.longtapcode.identity_service.dto.response.RefreshTokenResponse;
 import com.longtapcode.identity_service.service.AuthenticationService;
@@ -65,6 +62,14 @@ public class AuthenticationController {
         authenticationService.updateMyInfo(request);
         return ApiResponse.<String>builder()
                 .result("Profile updated successfully! ✅")
+                .build();
+    }
+
+    @PostMapping("/changePassWord/me")
+    public ApiResponse<?> changePassWord(@RequestBody ChangePassWordRequest request){
+        authenticationService.changePassword(request);
+        return ApiResponse.<String>builder()
+                .result("Change password successfully! ✅")
                 .build();
     }
 }

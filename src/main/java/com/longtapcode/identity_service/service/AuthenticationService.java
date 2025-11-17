@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import com.longtapcode.identity_service.dto.request.ChangePassWordRequest;
 import com.longtapcode.identity_service.dto.request.UpdateUserRequest;
 import com.longtapcode.identity_service.dto.response.UserResponse;
 import com.longtapcode.identity_service.mapper.UserMapper;
@@ -213,5 +214,22 @@ public class AuthenticationService {
             userRepository.save(user);
         }
 
+    }
+
+    public void changePassword(ChangePassWordRequest request ){
+        var context = SecurityContextHolder.getContext();
+        String userName = context.getAuthentication().getName();
+        if(userName.equals(request.getUserName())){
+            User user = userRepository.findByUserName(userName).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+            boolean isTruePass = passwordEncoder.matches(request.getCurrentPassword(),user.getPassword());
+            if(isTruePass){
+                String newPass = passwordEncoder.encode(request.getNewPassword());
+                user.setPassword(newPass);
+                userRepository.save(user);
+            }else{
+                throw new AppException(ErrorCode.INCORRECT_PASSWORD);
+            }
+        }
     }
 }
