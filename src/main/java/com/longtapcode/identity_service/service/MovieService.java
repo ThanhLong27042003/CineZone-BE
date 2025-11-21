@@ -16,6 +16,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -39,7 +42,6 @@ public class MovieService {
     public List<MovieResponse> getAllMovie(){
         List<Movie> listMovie = movieRepository.findAll();
         return movieMapper.toListMovieResponse(listMovie);
-
     }
 
     public void updateMovieById(UpdateMovieRequest request,Long id){
@@ -90,6 +92,12 @@ public class MovieService {
     public List<MovieResponse> searchMovies(String keyword){
         List<Movie> movies = movieRepository.searchMovies(keyword);
         return movieMapper.toListMovieResponse(movies);
+    }
+
+    public Page<MovieResponse> getMovieForPage(int page, int size){
+        Pageable pageable = PageRequest.of(page,size);
+        Page<Movie> pageMovie = movieRepository.findAll(pageable);
+        return pageMovie.map(movieMapper::toMovieResponse);
     }
 
 }
