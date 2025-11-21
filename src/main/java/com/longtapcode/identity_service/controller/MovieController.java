@@ -8,6 +8,7 @@ import com.longtapcode.identity_service.service.MovieService;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,4 +59,12 @@ public class MovieController {
                 .result(movieService.getTopMovieForHomePage(genres))
                 .build();
     }
+    @GetMapping("getMovieForPage/{page}/{size}")
+    public ApiResponse<Page<MovieResponse>> getMovieForPage(@PathVariable("page") int page, @PathVariable("size") int size ){
+        return ApiResponse.<Page<MovieResponse>>builder()
+                .result(movieService.getMovieForPage(page,size))
+                .build();
+    }
+
+
 }
