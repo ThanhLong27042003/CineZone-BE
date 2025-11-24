@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -52,13 +54,16 @@ public class Movie {
     @Column(name = "VoteCount")
      Integer voteCount;
 
+    @Column(name = "trailer")
+    String trailer;
+
     @ManyToMany
     @JoinTable(
             name="moviecasts",
             joinColumns = @JoinColumn(name = "movieid"),
             inverseJoinColumns = @JoinColumn(name = "castid")
     )
-
+    @OnDelete(action = OnDeleteAction.CASCADE)
     Set<Cast> casts;
 
     @ManyToMany
@@ -67,6 +72,7 @@ public class Movie {
             joinColumns = @JoinColumn(name = "movieid"),
             inverseJoinColumns = @JoinColumn(name = "genreid")
     )
+    @OnDelete(action = OnDeleteAction.CASCADE)
     Set<Genre> genres;
 
 }

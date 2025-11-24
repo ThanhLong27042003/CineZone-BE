@@ -24,6 +24,7 @@ public class MovieResponse {
     String backdropPath;
     BigDecimal voteAverage;
     Integer voteCount;
+    String trailer;
     Set<Genre> genres;
     Set<Cast> casts;
 }
