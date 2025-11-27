@@ -67,5 +67,20 @@ public class UserController {
         return ApiResponse.<String>builder().result("Delete user successful!").build();
     }
 
+    @PutMapping("addFavoriteMovie/{userId}/{movieId}")
+    public ApiResponse<String> addFavoriteMovie(@PathVariable("userId") String userId, @PathVariable("movieId") Long movieId){
+        userService.addFavoriteMovie(userId,movieId);
+        return ApiResponse.<String>builder()
+                .result("Add your favorite movie list successful!")
+                .build();
+    }
+    @DeleteMapping("removeFavoriteMovie/{userId}/{movieId}")
+    public ApiResponse<String> removeFavoriteMovie(@PathVariable("userId") String userId, @PathVariable("movieId") Long movieId){
+        userService.removeFavoriteMovie(userId,movieId);
+        return ApiResponse.<String>builder()
+                .result("Remove your favorite movie list successful!")
+                .build();
+    }
+
 
 }
