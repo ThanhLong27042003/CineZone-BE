@@ -66,5 +66,19 @@ public class MovieController {
                 .build();
     }
 
+    @GetMapping("getFavoriteMovie/{userId}")
+    public ApiResponse<List<MovieResponse>> getFavoriteMovie(@PathVariable("userId") String userId){
+        return ApiResponse.<List<MovieResponse>>builder()
+                .result(movieService.getFavoriteMovie(userId))
+                .build();
+    }
+    @GetMapping("isLiked/{userId}/{movieId}")
+    public ApiResponse<Boolean> isLiked(@PathVariable("userId") String userId,@PathVariable("movieId") Long movieId){
+        return ApiResponse.<Boolean>builder()
+                .result(movieService.isLiked(userId,movieId))
+                .build();
+    }
+
+
 
 }

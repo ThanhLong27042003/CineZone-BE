@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Data
@@ -31,4 +33,13 @@ public class User {
 
     @ManyToMany
     Set<Role> roles;
+
+    @ManyToMany
+    @JoinTable(
+            name="favoritemovies",
+            joinColumns = @JoinColumn(name = "id"),
+            inverseJoinColumns = @JoinColumn(name = "movieid")
+    )
+    @OnDelete(action= OnDeleteAction.CASCADE)
+    Set<Movie> favoriteMovies;
 }

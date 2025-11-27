@@ -10,7 +10,6 @@ import java.util.List;
 
 @Repository
 public interface CastRepository extends JpaRepository<Cast,Long> {
-    @Query("SELECT c FROM Cast c "+
-    "WHERE LOWER(c.name) LIKE LOWER((CONCAT('%',:keyword,'%')))")
+    @Query("SELECT c FROM Cast c WHERE LOWER(c.name) LIKE LOWER((CONCAT('%',:keyword,'%')))")
     List<Cast> searchCasts(@Param("keyword") String keyword);
 }
