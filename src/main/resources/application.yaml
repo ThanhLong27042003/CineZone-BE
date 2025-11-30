@@ -28,3 +28,8 @@ jwt:
   validationDuration: 20
   refreshableDuration: 120
   admin_password : admin123
+
+app:
+  payment:
+    mock-gateway-url: http://localhost:5173/payment/mock
+    return-url: http://localhost:5173/payment/callback

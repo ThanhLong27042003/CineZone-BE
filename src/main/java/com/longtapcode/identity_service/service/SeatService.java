@@ -25,7 +25,6 @@ public class SeatService {
     SeatMapper seatMapper;
     SeatRepository seatRepository;
     private final com.longtapcode.identity_service.repository.seatInstanceRepository seatInstanceRepository;
-    private final ShowRepository showRepository;
 
     public List<SeatResponse> getAllSeat(){
         List<Seat> seats = seatRepository.findAll();

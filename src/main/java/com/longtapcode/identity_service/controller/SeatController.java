@@ -1,7 +1,6 @@
 package com.longtapcode.identity_service.controller;
 
 import com.longtapcode.identity_service.dto.request.ApiResponse;
-import com.longtapcode.identity_service.dto.request.SeatHoldListRequest;
 import com.longtapcode.identity_service.dto.request.SeatHoldRequest;
 import com.longtapcode.identity_service.dto.request.SeatRequest;
 import com.longtapcode.identity_service.dto.response.SeatResponse;
@@ -57,13 +56,6 @@ public class SeatController {
     public ApiResponse<SeatUpdateSuccess> releaseSeat(@RequestBody SeatHoldRequest request) {
         return ApiResponse.<SeatUpdateSuccess>builder()
                 .result(seatHoldService.releaseSeat(request))
-                .build();
-    }
-
-    @PostMapping("/book")
-    public ApiResponse<SeatUpdateSuccess> bookSeat(@RequestBody SeatHoldListRequest request) {
-        return ApiResponse.<SeatUpdateSuccess>builder()
-                .result(seatHoldService.bookSeat(request))
                 .build();
     }
 
