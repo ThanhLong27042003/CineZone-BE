@@ -12,8 +12,12 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SeatHoldListRequest {
-    Long showId;
-    Set<String> seatNumbers;
-    String userId;
+public class PaymentCreateRequest {
+     Long showId;
+     Set<String> seatNumbers;
+     String userId;
+     Long amount;
+     String paymentMethod;
+     String returnUrl;
+
 }

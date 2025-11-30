@@ -1,17 +1,9 @@
 package com.longtapcode.identity_service.service;
 
 import com.longtapcode.identity_service.constant.SeatInstanceStatus;
-import com.longtapcode.identity_service.dto.request.SeatHoldListRequest;
 import com.longtapcode.identity_service.dto.request.SeatHoldRequest;
-import com.longtapcode.identity_service.dto.response.SeatPaymentResponse;
 import com.longtapcode.identity_service.dto.response.SeatUpdateResponse;
 import com.longtapcode.identity_service.dto.response.SeatUpdateSuccess;
-import com.longtapcode.identity_service.entity.Booking;
-import com.longtapcode.identity_service.entity.BookingDetail;
-import com.longtapcode.identity_service.entity.Show;
-import com.longtapcode.identity_service.entity.User;
-import com.longtapcode.identity_service.exception.AppException;
-import com.longtapcode.identity_service.exception.ErrorCode;
 import com.longtapcode.identity_service.repository.BookingDetailRepository;
 import com.longtapcode.identity_service.repository.BookingRepository;
 import com.longtapcode.identity_service.repository.ShowRepository;
@@ -116,57 +108,6 @@ public class SeatHoldService {
     public boolean isHeld(Long showId, String seatNumber) {
         String key = "hold:" + showId + ":" + seatNumber;
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
-    }
-
-
-    public SeatUpdateSuccess bookSeat(SeatHoldListRequest request) {
-        Long showId = request.getShowId();
-        Set<String> seatNumbers = request.getSeatNumbers();
-        String userId = request.getUserId();
-
-        User user = userRepository.findById(userId).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
-        Show show = showRepository.findById(showId).orElseThrow(()-> new AppException(ErrorCode.SHOW_NOT_EXISTED));
-        Booking booking = Booking.builder()
-                .id1(user)
-                .showID(show)
-                .build();
-         bookingRepository.save(booking);
-        Set<BookingDetail> bookingDetails = new HashSet<>();
-
-        for(String seatNumber : seatNumbers){
-            String holdKey = "hold:" + showId + ":" + seatNumber;
-            String bookedKey = "booked:" + showId + ":" + seatNumber;
-            redisTemplate.opsForValue().set(bookedKey, userId);
-            redisTemplate.delete(holdKey);
-
-            BookingDetail bookingDetail = BookingDetail.builder()
-                    .bookingID(booking)
-                    .seatNumber(seatNumber)
-                    .price(show.getPrice())
-                    .build();
-
-            bookingDetails.add(bookingDetail);
-        }
-
-        bookingDetailRepository.saveAll(bookingDetails);
-
-        SeatPaymentResponse message = SeatPaymentResponse.builder()
-                .showId(request.getShowId())
-                .userId(userId)
-                .seatNumbers(request.getSeatNumbers())
-                .status(SeatInstanceStatus.BOOKED.getStatus())
-                .expiresAt(0L)
-                .build();
-
-        messagingTemplate.convertAndSend(
-                "/topic/show/" + request.getShowId(),
-                message
-        );
-
-        return SeatUpdateSuccess.builder()
-                .success(true)
-                .message("Đặt ghế thành công!")
-                .build();
     }
 
     public SeatUpdateSuccess releaseSeat(SeatHoldRequest request) {

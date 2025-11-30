@@ -32,9 +32,19 @@ public class Booking {
     @JoinColumn(name = "ShowID")
      Show showID;
 
+    @Column(name = "order_id", unique = true)
+    private String orderId;
 
-    @CreationTimestamp
-    @Column(name = "CreatedAt")
-    LocalDateTime created_at;
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
+    @Column(name = "total_price")
+    private Long totalPrice;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "booking_date")
+    private LocalDateTime bookingDate;
 
 }
