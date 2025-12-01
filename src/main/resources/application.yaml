@@ -33,3 +33,16 @@ app:
   payment:
     mock-gateway-url: http://localhost:5173/payment/mock
     return-url: http://localhost:5173/payment/callback
+
+vnpay:
+  pay-url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+  return-url: "http://localhost:5173/payment/callback"
+  tmn-code: "36C1IOEI"
+  secret-key: "YCZ86K3CMBJ18N027MX8EPRGRK1I05TN"
+
+paypal:
+  client-id: "AcViCLu3BsOXOehzjs8F486v57D4EjodPmZIoEHfj_yI-cxBg5OsQJS_HLoGUibfC0iPVk_rc-cHY74G"
+  client-secret: "EDTKuTjRkNxaMLSt9kcfZI4prvpv58D7TqLWfWNRPrRxIzD8beKgCbDeLzet_9j1u-ZQCrsZdoRLWBwS"
+  mode: "sandbox"
+  return-url: "http://localhost:5173/payment/paypal-callback"
+  cancel-url: "http://localhost:5173/payment/cancelled"

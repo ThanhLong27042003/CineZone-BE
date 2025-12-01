@@ -5,6 +5,7 @@ import com.longtapcode.identity_service.dto.request.PaymentCreateRequest;
 import com.longtapcode.identity_service.dto.response.PaymentCallbackResponse;
 import com.longtapcode.identity_service.dto.response.PaymentCreateResponse;
 import com.longtapcode.identity_service.service.PaymentService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -21,12 +22,12 @@ public class PaymentController {
 
     @PostMapping("/create")
     public ApiResponse<PaymentCreateResponse> createPayment(
-            @RequestBody PaymentCreateRequest request) {
+            @RequestBody PaymentCreateRequest request, HttpServletRequest httpRequest) {
 
         log.info("Creating payment for user: {}, showId: {}, seats: {}",
                 request.getUserId(), request.getShowId(), request.getSeatNumbers());
 
-        PaymentCreateResponse response = paymentService.createPayment(request);
+        PaymentCreateResponse response = paymentService.createPayment(request,httpRequest);
 
         return ApiResponse.<PaymentCreateResponse>builder()
                 .code(1000)
@@ -35,13 +36,29 @@ public class PaymentController {
                 .build();
     }
 
-    @PostMapping("/callback")
-    public ApiResponse<PaymentCallbackResponse> handlePaymentCallback(
+    @GetMapping("/vnpay-callback")
+    public ApiResponse<PaymentCallbackResponse> vnpayCallback(
             @RequestBody Map<String, String> params) {
 
-        log.info("Received payment callback: {}", params);
+        log.info("Received VNPay callback with params: {}", params);
 
-        PaymentCallbackResponse response = paymentService.processPaymentCallback(params);
+        PaymentCallbackResponse response = paymentService.processVNPayCallback(params);
+
+        return ApiResponse.<PaymentCallbackResponse>builder()
+                .code(1000)
+                .message("Booking confirmed successfully")
+                .result(response)
+                .build();
+    }
+
+    @GetMapping("/paypal-callback")
+    public ApiResponse<PaymentCallbackResponse> paypalCallback(
+            @RequestParam("token") String token,
+            @RequestParam(value = "PayerID", required = false) String payerId) {
+
+        log.info("Received PayPal callback - Token: {}, PayerID: {}", token, payerId);
+
+        PaymentCallbackResponse response = paymentService.processPayPalCallback(token, payerId);
 
         return ApiResponse.<PaymentCallbackResponse>builder()
                 .code(1000)
