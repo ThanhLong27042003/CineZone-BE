@@ -29,7 +29,9 @@ public enum ErrorCode {
     SEAT_NOT_EXISTED(1015, "Seat is not existed", HttpStatus.BAD_REQUEST),
     INCORRECT_PASSWORD(1016,"The password is incorrect. Please try again!",HttpStatus.BAD_REQUEST),
     PAYMENT_FAILED(1017, "Payment failed or cancelled",HttpStatus.BAD_REQUEST),
-    SEAT_NOT_AVAILABLE(1018, "Seat is no longer available",HttpStatus.BAD_REQUEST);
+    SEAT_NOT_AVAILABLE(1018, "Seat is no longer available",HttpStatus.BAD_REQUEST),
+    INVALID_SIGNATURE(1019, "Invalid payment signature",HttpStatus.BAD_REQUEST),
+    PAYMENT_NOT_FOUND(1020, "Payment metadata not found",HttpStatus.BAD_REQUEST);
     final int code;
     final String message;
     final HttpStatus statusCode;

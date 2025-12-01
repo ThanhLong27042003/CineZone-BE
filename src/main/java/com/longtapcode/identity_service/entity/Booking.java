@@ -33,18 +33,18 @@ public class Booking {
      Show showID;
 
     @Column(name = "order_id", unique = true)
-    private String orderId;
+    String orderId;
 
     @Column(name = "payment_method")
-    private String paymentMethod;
+    String paymentMethod;
 
     @Column(name = "total_price")
-    private Long totalPrice;
+    Long totalPrice;
 
     @Column(name = "status")
-    private String status;
+    String status;
 
     @Column(name = "booking_date")
-    private LocalDateTime bookingDate;
+    LocalDateTime bookingDate;
 
 }
