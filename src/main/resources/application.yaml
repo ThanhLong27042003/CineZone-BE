@@ -16,23 +16,62 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-
   redis:
     data:
       redis:
         host: localhost
         port: 6379
+  kafka:
+    bootstrap-servers: localhost:29092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: email-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: com.longtapcode.identity_service.dto.event.BookingConfirmedEvent
+    topics:
+      booking-confirmed: booking-confirmed
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: tranngocthanhlong03@gmail.com
+    password: texsketeuqernzpi
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+    from: "CineZone Booking <tranngocthanhlong03@gmail.com>"
+    templates:
+      path: classpath:/templates/email/
+
+
+app:
+  email:
+    enabled: true
+    frontend-url: http://localhost:5173
+
+
 
 jwt:
   signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
   validationDuration: 20
   refreshableDuration: 120
   admin_password : admin123
-
-app:
-  payment:
-    mock-gateway-url: http://localhost:5173/payment/mock
-    return-url: http://localhost:5173/payment/callback
 
 vnpay:
   pay-url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
