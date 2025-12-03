@@ -1,12 +1,11 @@
 package com.longtapcode.identity_service.service;
 
+import com.longtapcode.identity_service.dto.event.BookingConfirmedEvent;
+import com.longtapcode.identity_service.dto.event.SeatInfoEvent;
 import com.longtapcode.identity_service.dto.request.PaymentCreateRequest;
 import com.longtapcode.identity_service.dto.response.PaymentCallbackResponse;
 import com.longtapcode.identity_service.dto.response.PaymentCreateResponse;
-import com.longtapcode.identity_service.entity.Booking;
-import com.longtapcode.identity_service.entity.BookingDetail;
-import com.longtapcode.identity_service.entity.Show;
-import com.longtapcode.identity_service.entity.User;
+import com.longtapcode.identity_service.entity.*;
 import com.longtapcode.identity_service.constant.SeatInstanceStatus;
 import com.longtapcode.identity_service.exception.AppException;
 import com.longtapcode.identity_service.exception.ErrorCode;
@@ -34,21 +33,17 @@ public class PaymentService {
     private final RedisTemplate<String, String> redisTemplate;
     private final SimpMessagingTemplate messagingTemplate;
 
-    // Payment Gateway Services
-    private final VNPayService vnPayService;  // Tách VNPay logic sang VNPayService
+    private final VNPayService vnPayService;
     private final PayPalService payPalService;
 
-    /**
-     * ✅ Route payment request đến gateway tương ứng
-     */
+    private final KafkaProducerService kafkaProducerService;
+
     public PaymentCreateResponse createPayment(PaymentCreateRequest request, HttpServletRequest httpRequest) {
         log.info("Creating payment - Method: {}, ShowId: {}, User: {}",
                 request.getPaymentMethod(), request.getShowId(), request.getUserId());
 
-        // 1. Validate common logic
         validateSeatsHeld(request);
 
-        // 2. Route to appropriate gateway
         switch (request.getPaymentMethod().toLowerCase()) {
             case "vnpay":
                 return vnPayService.createVNPayPayment(request, httpRequest);
@@ -61,16 +56,8 @@ public class PaymentService {
         }
     }
 
-    /**
-     * ✅ Validate seats vẫn được hold bởi user
-     */
+
     private void validateSeatsHeld(PaymentCreateRequest request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-        Show show = showRepository.findById(request.getShowId())
-                .orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
-
         for (String seatNumber : request.getSeatNumbers()) {
             String holdKey = "hold:" + request.getShowId() + ":" + seatNumber;
             String heldByUser = redisTemplate.opsForValue().get(holdKey);
@@ -82,9 +69,6 @@ public class PaymentService {
         }
     }
 
-    /**
-     * ✅ VNPay callback handler
-     */
     @Transactional
     public PaymentCallbackResponse processVNPayCallback(Map<String, String> params) {
         log.info("Processing VNPay callback");
@@ -93,9 +77,7 @@ public class PaymentService {
         return completeBooking(result);
     }
 
-    /**
-     * ✅ PayPal callback handler
-     */
+
     @Transactional
     public PaymentCallbackResponse processPayPalCallback(String paypalOrderId, String token) {
         log.info("Processing PayPal callback - OrderId: {}, Token: {}", paypalOrderId, token);
@@ -104,9 +86,6 @@ public class PaymentService {
         return completeBooking(result);
     }
 
-    /**
-     * ✅ Common booking creation logic
-     */
     private PaymentCallbackResponse completeBooking(Map<String, Object> paymentResult) {
         Boolean success = (Boolean) paymentResult.get("success");
 
@@ -119,7 +98,6 @@ public class PaymentService {
             throw new AppException(ErrorCode.PAYMENT_FAILED);
         }
 
-        // Extract payment info
         String orderId = (String) paymentResult.get("orderId");
         Long showId = (Long) paymentResult.get("showId");
         String userId = (String) paymentResult.get("userId");
@@ -139,7 +117,7 @@ public class PaymentService {
                 .id1(user)
                 .showID(show)
                 .bookingDate(LocalDateTime.now())
-                .totalPrice(amount) // ✅ Amount in cents, convert if needed
+                .totalPrice(amount)
                 .paymentMethod(paymentMethod)
                 .orderId(orderId)
                 .status("CONFIRMED")
@@ -148,11 +126,9 @@ public class PaymentService {
         bookingRepository.save(booking);
         log.info("Created booking with ID: {}", booking.getId());
 
-        // Create BookingDetails and update Redis
         Set<BookingDetail> bookingDetails = new HashSet<>();
 
         for (String seatNumber : seatNumbers) {
-            // Update Redis: HELD → BOOKED
             String holdKey = "hold:" + showId + ":" + seatNumber;
             String bookedKey = "booked:" + showId + ":" + seatNumber;
 
@@ -171,7 +147,6 @@ public class PaymentService {
         bookingDetailRepository.saveAll(bookingDetails);
         log.info("Created {} booking details", bookingDetails.size());
 
-        // Broadcast WebSocket
         Set<String> seatNumberSet = Set.of(seatNumbers);
         PaymentCreateResponse wsMessage = PaymentCreateResponse.builder()
                 .showId(showId)
@@ -184,6 +159,8 @@ public class PaymentService {
         messagingTemplate.convertAndSend("/topic/show/" + showId, wsMessage);
         log.info("Broadcasted BOOKED status for show: {}", showId);
 
+        publishBookingConfirmedEvent(booking, show, user, seatNumbers, paymentResult);
+
         return PaymentCallbackResponse.builder()
                 .success(true)
                 .bookingId(booking.getId())
@@ -192,9 +169,52 @@ public class PaymentService {
                 .build();
     }
 
-    /**
-     * ✅ Unlock seats on payment failure
-     */
+    private void publishBookingConfirmedEvent(Booking booking, Show show, User user,
+                                              String[] seatNumbers, Map<String, Object> paymentResult){
+        try{
+
+            Set<SeatInfoEvent> seats = new HashSet<>();
+            for (String seatNumber : seatNumbers) {
+                seats.add(SeatInfoEvent.builder()
+                        .seatNumber(seatNumber)
+                        .build());
+            }
+
+            // Build event
+            BookingConfirmedEvent event = BookingConfirmedEvent.builder()
+                    // Booking info
+                    .bookingId(booking.getId())
+                    .orderId(booking.getOrderId())
+                    .bookingDate(booking.getBookingDate())
+                    .totalPrice(booking.getTotalPrice())
+                    .paymentMethod(booking.getPaymentMethod())
+                    .transactionId((String) paymentResult.getOrDefault("transactionId", "N/A"))
+
+                    // User info
+                    .userId(user.getId())
+                    .userEmail(user.getEmailAddress())
+                    .userName(user.getUserName())
+
+                    // Show info
+                    .showId(show.getId())
+                    .movieTitle(show.getMovieID().getTitle())
+                    .showDateTime(show.getShowDateTime())
+
+                    .seats(seats)
+
+                    .eventTime(LocalDateTime.now())
+                    .build();
+
+            // Publish to Kafka
+            kafkaProducerService.publishBookingConfirmed(event);
+
+            log.info("Published BookingConfirmedEvent for booking: {}", booking.getId());
+        }catch(Exception e){
+            log.error("Failed to publish BookingConfirmedEvent for booking: {}", booking.getId(), e);
+        }
+
+    }
+
     private void unlockSeats(Long showId, String[] seatNumbers, String userId) {
         log.info("Unlocking seats for failed payment - ShowId: {}, User: {}", showId, userId);
 
@@ -207,7 +227,6 @@ public class PaymentService {
             }
         }
 
-        // Broadcast unlock
         Set<String> seatNumberSet = Set.of(seatNumbers);
         PaymentCreateResponse wsMessage = PaymentCreateResponse.builder()
                 .showId(showId)

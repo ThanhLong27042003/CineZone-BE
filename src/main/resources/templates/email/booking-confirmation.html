@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .success-message p {
+            color: #155724;
+            font-weight: 500;
+        }
+
+        .ticket-info {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .ticket-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #212529;
+            font-weight: 600;
+        }
+
+        .seats-section {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .seats-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .seats-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .seat-badge {
+            background-color: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .qr-code {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .qr-code img {
+            max-width: 200px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: white;
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .footer p {
+            margin-bottom: 10px;
+        }
+
+        .social-links {
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .total-price {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .header, .content, .footer {
+                padding: 20px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>🎬 Booking Confirmed!</h1>
+        <p>Thank you for your purchase</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <!-- Success Message -->
+        <div class="success-message">
+            <p>✅ Your booking has been confirmed successfully!</p>
+        </div>
+
+        <!-- Greeting -->
+        <p style="font-size: 16px; margin-bottom: 20px;">
+            Hello <strong th:text="${userName}">Customer</strong>,
+        </p>
+
+        <p style="color: #6c757d; margin-bottom: 30px;">
+            Your tickets for <strong th:text="${movieTitle}">Movie Title</strong> have been confirmed.
+            Please find your booking details below:
+        </p>
+
+        <!-- Movie & Show Info -->
+        <div class="ticket-info">
+            <div class="ticket-header">🎥 Show Information</div>
+
+            <div class="info-row">
+                <span class="info-label">Movie:</span>
+                <span class="info-value" th:text="${movieTitle}">Movie Title</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Cinema:</span>
+                <span class="info-value" th:text="${cinemaName}">Cinema Name</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Theater:</span>
+                <span class="info-value" th:text="${theaterName}">Theater 1</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Show Date:</span>
+                <span class="info-value" th:text="${showDate}">December 01, 2025</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Show Time:</span>
+                <span class="info-value" th:text="${showTimeOnly}">7:00 PM</span>
+            </div>
+        </div>
+
+        <!-- Seats Section -->
+        <div class="seats-section">
+            <div class="seats-title">🪑 Your Seats</div>
+            <div class="seats-list">
+                <span class="seat-badge" th:each="seat : ${seats}" th:text="${seat.seatNumber}">A1</span>
+            </div>
+            <p style="margin-top: 15px; color: #856404; font-size: 14px;">
+                Total Seats: <strong th:text="${seatCount}">2</strong>
+            </p>
+        </div>
+
+        <!-- Booking Details -->
+        <div class="ticket-info">
+            <div class="ticket-header">📋 Booking Details</div>
+
+            <div class="info-row">
+                <span class="info-label">Booking ID:</span>
+                <span class="info-value" th:text="${bookingId}">#12345</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Order ID:</span>
+                <span class="info-value" th:text="${orderId}">ORD-XXX</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Booking Date:</span>
+                <span class="info-value" th:text="${bookingDate}">Dec 01, 2025</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Payment Method:</span>
+                <span class="info-value" th:text="${paymentMethod}">PayPal</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Transaction ID:</span>
+                <span class="info-value" th:text="${transactionId}">TXN-XXX</span>
+            </div>
+
+            <div class="info-row" style="border-top: 2px solid #667eea; margin-top: 15px; padding-top: 15px;">
+                <span class="info-label" style="font-size: 18px;">Total Amount:</span>
+                <span class="total-price" th:text="${totalPrice}">$29.98</span>
+            </div>
+        </div>
+
+        <!-- QR Code -->
+        <div class="qr-code">
+            <p style="color: #6c757d; margin-bottom: 15px;">
+                <strong>Show this QR code at the cinema:</strong>
+            </p>
+            <img th:src="${qrCodeUrl}" alt="QR Code" />
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a th:href="${viewBookingUrl}" class="btn btn-primary">View My Bookings</a>
+            <a th:href="${homeUrl}" class="btn btn-secondary">Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p><strong>Need Help?</strong></p>
+        <p>Contact us at <a href="mailto:support@cinema.com">support@cinema.com</a></p>
+        <p style="margin-top: 20px; font-size: 12px; color: #adb5bd;">
+            This is an automated email. Please do not reply to this message.
+        </p>
+
+        <div class="social-links">
+            <a href="#">Facebook</a> |
+            <a href="#">Twitter</a> |
+            <a href="#">Instagram</a>
+        </div>
+
+        <p style="margin-top: 20px; font-size: 12px;">
+            © 2025 Cinema Booking. All rights reserved.
+        </p>
+    </div>
+</div>
+</body>
+</html>
