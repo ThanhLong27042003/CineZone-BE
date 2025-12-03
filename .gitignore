@@ -33,4 +33,5 @@ build/
 .vscode/
 
 # Spring Boot sensitive files
-.\src\main\resources\application.yaml
+./src/main/resources/application.yaml
+./clone BE
