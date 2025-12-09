@@ -9,4 +9,5 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CastMapper {
     List<CastResponse> toListCastResponse(List<Cast> cast);
+    CastResponse toCastResponse(Cast cast);
 }

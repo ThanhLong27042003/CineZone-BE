@@ -29,7 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConfigSecurity {
-    static final String[] PUBLIC_ENDPOINTS = {"/auth/log-in", "/auth/refreshToken", "/movie/**" ,"/show/**","/cast/**", "/seat/**","/user/createUser","/general/**","/payment/**"};
+    static final String[] PUBLIC_ENDPOINTS = {"/auth/log-in", "/auth/refreshToken", "/movie/**" ,"/show/**","/cast/**", "/seat/**","/user/createUser","/general/**","/payment/**","/admin/**","/genre/**"};
 
     CustomJwtDecoder customJwtDecoder;
 

@@ -1,7 +1,7 @@
 package com.longtapcode.identity_service.mapper;
 
-import com.longtapcode.identity_service.dto.request.MovieRequest;
-import com.longtapcode.identity_service.dto.request.UpdateMovieRequest;
+import com.longtapcode.identity_service.dto.request.admin.MovieRequest;
+import com.longtapcode.identity_service.dto.request.admin.UpdateMovieRequest;
 import com.longtapcode.identity_service.dto.response.MovieResponse;
 import com.longtapcode.identity_service.entity.Movie;
 import org.mapstruct.Mapper;

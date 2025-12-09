@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -27,13 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
     UserService userService;
 
-    @PostMapping("/createUser")
-//    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<String> createUser(@RequestBody @Valid CreationUserRequest request) {
-        userService.createUserService(request);
-        return ApiResponse.<String>builder().result("Create user successful!").build();
-    }
-
     @PutMapping("/updateUser/{id}")
 //    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<String> updateUser(
@@ -42,30 +36,6 @@ public class UserController {
         return ApiResponse.<String>builder().result("Update user successful!").build();
     }
 
-    @GetMapping("/getAllUsers")
-//    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<UserResponse>> getAllUsers() {
-        var authenticate = SecurityContextHolder.getContext().getAuthentication();
-        authenticate.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
-        return ApiResponse.<List<UserResponse>>builder()
-                .result(userService.getAllUsers())
-                .build();
-    }
-
-    @GetMapping("getUser/{Id}")
-//    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<UserResponse> getUser(@PathVariable("Id") String id) {
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.getUserById(id))
-                .build();
-    }
-
-    @DeleteMapping("/deleteUser/{Id}")
-//    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<String> deleteUser(@PathVariable("Id") String id) {
-        userService.deleteUser(id);
-        return ApiResponse.<String>builder().result("Delete user successful!").build();
-    }
 
     @PutMapping("addFavoriteMovie/{userId}/{movieId}")
     public ApiResponse<String> addFavoriteMovie(@PathVariable("userId") String userId, @PathVariable("movieId") Long movieId){

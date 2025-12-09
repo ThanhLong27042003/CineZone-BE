@@ -25,12 +25,6 @@ public class ShowController {
                 .build();
 
     }
-    @PostMapping("/createShow")
-    public ApiResponse<ShowResponse> createShow(@RequestBody ShowRequest request){
-        return ApiResponse.<ShowResponse>builder()
-                .result(showService.createShow(request))
-                .build();
-    }
     @GetMapping("/getAllShow")
     public ApiResponse<List<ShowResponse>> getAllShow(){
         return ApiResponse.<List<ShowResponse>>builder()
@@ -41,21 +35,6 @@ public class ShowController {
     public ApiResponse<List<ShowResponse>> getAllShowByMovieId(@PathVariable Long movieId){
         return ApiResponse.<List<ShowResponse>>builder()
                 .result(showService.getAllShowByMovieId(movieId))
-                .build();
-    }
-    @PutMapping("updateShow/{id}")
-    public ApiResponse<String> updateShowById(@RequestBody UpdateShowRequest request, @PathVariable Long id){
-        showService.updateShowById(request,id);
-        return ApiResponse.<String>builder()
-                .result("Update show successful!")
-                .build();
-    }
-
-    @DeleteMapping("deleteShow/{id}")
-    public ApiResponse<String> deleteShowById(@PathVariable Long id){
-        showService.deleteShowById(id);
-        return ApiResponse.<String>builder()
-                .result("Delete show successful!")
                 .build();
     }
 
