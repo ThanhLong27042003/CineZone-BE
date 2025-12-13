@@ -28,6 +28,11 @@ public class Show {
     @JoinColumn(name = "MovieID")
      Movie movieID;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "RoomId")
+    Room roomId;
+
     @NotNull
     @Column(name = "ShowDateTime", nullable = false)
     LocalDateTime showDateTime;
@@ -35,5 +40,6 @@ public class Show {
     @NotNull
     @Column(name = "Price", nullable = false, precision = 10, scale = 2)
      BigDecimal price;
+
 
 }

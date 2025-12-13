@@ -13,6 +13,8 @@ import java.time.LocalTime;
 public class ShowResponse {
     Long showId;
     Long movieId;
+    Long roomId;
+    String roomName;
     LocalDate showDate;
     LocalTime showTime;
     BigDecimal price;

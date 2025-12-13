@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShowRequest {
     Long movieId;
+    Long roomId;
     LocalDateTime showDateTime;
     BigDecimal price;
 }

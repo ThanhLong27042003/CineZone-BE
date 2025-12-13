@@ -5,12 +5,16 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateShowRequest {
     Long movieId;
-    LocalDateTime showDateTime;
+    Long roomId;
+    LocalDate showDate;
+    LocalTime showTime;
     BigDecimal price;
 }

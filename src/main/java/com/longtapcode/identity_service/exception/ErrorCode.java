@@ -38,7 +38,10 @@ public enum ErrorCode {
     BOOKING_NOT_FOUND(1024,"Booking not found!",HttpStatus.BAD_REQUEST),
     BOOKING_ALREADY_CONFIRMED(1025,"booking has already been confirmed",HttpStatus.BAD_REQUEST),
     BOOKING_ALREADY_CANCELLED(1026,"booking has already been cancelled",HttpStatus.BAD_REQUEST),
-    ACCOUNT_IS_LOCKED(1027,"This account is locked. Please contact an administrator for help",HttpStatus.BAD_REQUEST);
+    ACCOUNT_IS_LOCKED(1027,"This account is locked. Please contact an administrator for help",HttpStatus.BAD_REQUEST),
+    ROOM_NOT_EXISTED(1028,"Room is not existed",HttpStatus.BAD_REQUEST),
+    ROOM_EXISTED(1029,"Room already exists",HttpStatus.BAD_REQUEST),
+    SHOW_OVERLAP(1030,"Show time overlaps with existing show in the same room",HttpStatus.BAD_REQUEST);
     final int code;
     final String message;
     final HttpStatus statusCode;
