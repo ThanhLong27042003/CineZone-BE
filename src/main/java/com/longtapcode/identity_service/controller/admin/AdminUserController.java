@@ -54,11 +54,11 @@ public class AdminUserController {
                 .build();
     }
 
-    @DeleteMapping("/{userId}")
-    public ApiResponse<Void> deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
-        return ApiResponse.<Void>builder()
-                .message("User deleted successfully")
+    @PostMapping("/{userId}")
+    public ApiResponse<String> lockUser(@PathVariable String userId) {
+
+        return ApiResponse.<String>builder()
+                .result(userService.lockUser(userId))
                 .build();
     }
 }

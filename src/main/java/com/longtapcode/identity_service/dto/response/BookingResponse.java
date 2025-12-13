@@ -1,20 +1,28 @@
 package com.longtapcode.identity_service.dto.response;
 
-import com.longtapcode.identity_service.entity.Show;
-import com.longtapcode.identity_service.entity.User;
-import jakarta.persistence.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingResponse {
     Long id;
-    String userId;
-    Long showId;
     String orderId;
+    String userId;
+    String userName;
+    String userEmail;
+    Long showId;
+    String movieTitle;
+    LocalDateTime showDateTime;
     String paymentMethod;
     Long totalPrice;
     String status;
     LocalDateTime bookingDate;
+    Set<BookingDetailResponse> bookingDetails;
 }

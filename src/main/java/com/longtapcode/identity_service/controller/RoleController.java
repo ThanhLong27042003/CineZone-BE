@@ -26,13 +26,13 @@ public class RoleController {
         return ApiResponse.<String>builder().result("update role successful").build();
     }
 
-    @GetMapping("getAllRole")
+    @GetMapping("/getAllRole")
     public ApiResponse<List<RoleResponse>> getAllRole() {
         var roles = roleService.getAllRole();
         return ApiResponse.<List<RoleResponse>>builder().result(roles).build();
     }
 
-    @DeleteMapping("deleteRole/{role}")
+    @DeleteMapping("/deleteRole/{role}")
     public ApiResponse<String> deleteRole(@PathVariable("role") String role) {
         roleService.deleteRole(role);
         return ApiResponse.<String>builder().result("delete role successful").build();

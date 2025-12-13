@@ -100,11 +100,15 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public void deleteUser(String id) {
-        if (!userRepository.existsById(id)) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+    public String lockUser(String id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.toggleLock();
+        userRepository.save(user);
+        if(user.isLock()){
+            return "This account is locked";
+        }else{
+            return "This account is unlocked";
         }
-        userRepository.deleteById(id);
     }
 
 

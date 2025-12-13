@@ -66,10 +66,11 @@ public class AuthenticationService {
         User user = userRepository
                 .findByUserName(request.getUserName())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        logOutToken(request);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassWord(), user.getPassword());
-        if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (!authenticated) throw new AppException(ErrorCode.INCORRECT_PASSWORD);
+        if(user.isLock()) throw new AppException(ErrorCode.ACCOUNT_IS_LOCKED);
+        logOutToken(request);
         String accessToken = generateToken(user, false);
         String refreshToken = generateToken(user, true);
         setRefreshTokenCookie(res,refreshToken);

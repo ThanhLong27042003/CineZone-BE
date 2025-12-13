@@ -30,6 +30,10 @@ public class User {
     String emailAddress;
     String avatar;
     LocalDate dob;
+    @Column(name = "isLock", nullable = false,columnDefinition = "TINYINT(1) DEFAULT 0"
+    )
+    boolean isLock = false;
+
 
     @ManyToMany
     Set<Role> roles;
@@ -42,4 +46,8 @@ public class User {
     )
     @OnDelete(action= OnDeleteAction.CASCADE)
     Set<Movie> favoriteMovies;
+
+    public void toggleLock(){
+        this.isLock = !this.isLock();
+    }
 }

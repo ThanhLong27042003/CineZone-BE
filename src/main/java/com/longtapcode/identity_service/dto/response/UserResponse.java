@@ -24,5 +24,6 @@ public class UserResponse {
     String emailAddress;
     String avatar;
     LocalDate dob;
+    boolean isLock;
     Set<Role> roles;
 }
