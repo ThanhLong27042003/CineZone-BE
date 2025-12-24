@@ -43,10 +43,6 @@ public class SeatHoldService {
             end
             """, Long.class
     );
-    private final UserRepository userRepository;
-    private final ShowRepository showRepository;
-    private final BookingDetailRepository bookingDetailRepository;
-    private final BookingRepository bookingRepository;
 
     public SeatUpdateSuccess holdSeat(SeatHoldRequest request) {
         Long showId = request.getShowId();

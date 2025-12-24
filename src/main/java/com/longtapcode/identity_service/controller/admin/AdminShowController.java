@@ -36,18 +36,20 @@ public class AdminShowController {
     }
 
     @PostMapping
-    public ApiResponse<ShowResponse> createShow(@RequestBody ShowRequest request) {
-        return ApiResponse.<ShowResponse>builder()
-                .result(showService.createShow(request))
+    public ApiResponse<String> createShow(@RequestBody ShowRequest request) {
+        showService.createShow(request);
+        return ApiResponse.<String>builder()
+                .result("Create show successfully")
                 .build();
     }
 
     @PutMapping("/{showId}")
-    public ApiResponse<ShowResponse> updateShow(
+    public ApiResponse<String> updateShow(
             @PathVariable Long showId,
             @RequestBody UpdateShowRequest request) {
-        return ApiResponse.<ShowResponse>builder()
-                .result(showService.updateShow(showId, request))
+        showService.updateShow(showId, request);
+        return ApiResponse.<String>builder()
+                .result("Show updated successfully")
                 .build();
     }
 

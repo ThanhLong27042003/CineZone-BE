@@ -59,3 +59,9 @@ paypal:
   mode: "sandbox"
   return-url: "http://localhost:5173/payment/paypal-callback"
   cancel-url: "http://localhost:5173/payment/cancelled"
+
+
+ai:
+  service:
+    url: http://localhost:8000
+    enabled: true

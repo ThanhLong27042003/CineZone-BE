@@ -77,7 +77,7 @@ public class ConfigSecurity {
         corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
-        corsConfiguration.setAllowCredentials(true); // nếu dùng cookie hoặc Authorization
+        corsConfiguration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);

@@ -12,4 +12,14 @@ import java.util.List;
 public interface CastRepository extends JpaRepository<Cast,Long> {
     @Query("SELECT c FROM Cast c WHERE LOWER(c.name) LIKE LOWER((CONCAT('%',:keyword,'%')))")
     List<Cast> searchCasts(@Param("keyword") String keyword);
+
+    @Query("""
+    SELECT DISTINCT c.id
+    FROM Movie m
+    JOIN m.casts c
+    WHERE m.id = :movieId
+""")
+    List<Long> findCastIdsByMovie(@Param("movieId") Long movieId);
+
 }
+

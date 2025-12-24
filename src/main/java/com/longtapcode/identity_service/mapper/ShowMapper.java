@@ -14,6 +14,7 @@ import java.util.List;
 public interface ShowMapper {
     @Mapping(target = "movieID", ignore = true)
     @Mapping(target = "roomId", ignore = true)
+    @Mapping(target = "showDateTime", expression = "java(java.time.LocalDateTime.of(request.getShowDate(), request.getShowTime()))")
     Show toShow(ShowRequest request);
 
     @Mapping(target = "showId", source="id")

@@ -64,4 +64,19 @@ Page<Booking> findAllWithFilters(
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
             @Param("limit") int limit);
+
+    @Query("SELECT b.id, u.id, s.id, m.id, m.title, s.showDateTime, b.totalPrice, " +
+            "(SELECT COUNT(bd.id) AS seatCount FROM BookingDetail bd WHERE bd.bookingID = b), " +
+            "b.bookingDate, b.status " +
+            "FROM Booking b " +
+            "JOIN b.id1 u " +
+            "JOIN b.showID s " +
+            "JOIN s.movieID m " +
+            "WHERE (:fromDate IS NULL OR b.bookingDate >= :fromDate) " +
+            "AND (:toDate IS NULL OR b.bookingDate <= :toDate)"
+    )
+    List<Object[]> getBookingDataForAI(
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate
+    );
 }
