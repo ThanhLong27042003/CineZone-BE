@@ -30,9 +30,7 @@ public class PayPalService {
     private final ShowRepository showRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
-    /**
-     * Tạo PayPal Order
-     */
+
     public PaymentCreateResponse createPayPalOrder(PaymentCreateRequest request) {
         log.info("Creating PayPal order for showId: {}, user: {}", request.getShowId(), request.getUserId());
 
@@ -151,9 +149,7 @@ public class PayPalService {
         }
     }
 
-    /**
-     * Capture PayPal Payment sau khi user approve
-     */
+
     public Map<String, Object> capturePayPalOrder(String paypalOrderId) {
         log.info("Capturing PayPal order: {}", paypalOrderId);
 
@@ -174,7 +170,6 @@ public class PayPalService {
                 throw new AppException(ErrorCode.PAYMENT_NOT_FOUND);
             }
 
-            // ✅ Parse amount safely (now it's integer/cents)
             String amountStr = (String) rawMetadata.get("amount");
             Long amountCents;
 
@@ -192,7 +187,6 @@ public class PayPalService {
                 log.info("Converted decimal to cents: {} -> {} cents", amountStr, amountCents);
             }
 
-            // Return data để PaymentService xử lý
             Map<String, Object> result = new HashMap<>();
             result.put("success", "COMPLETED".equals(order.status()));
             result.put("orderId", rawMetadata.get("orderId"));
@@ -203,7 +197,6 @@ public class PayPalService {
             result.put("amount", amountCents); // ✅ Return cents (Long)
             result.put("paymentMethod", "PAYPAL");
 
-            // Get transaction ID safely
             try {
                 String transactionId = order.purchaseUnits().get(0)
                         .payments()

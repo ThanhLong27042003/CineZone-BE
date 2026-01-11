@@ -1,7 +1,5 @@
 package com.longtapcode.identity_service.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.longtapcode.identity_service.entity.Cast;
 import com.longtapcode.identity_service.entity.Movie;
 import com.longtapcode.identity_service.entity.Show;
 import com.longtapcode.identity_service.repository.*;
@@ -11,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,7 +23,6 @@ import java.util.*;
 public class AIService {
 
     final RestTemplate restTemplate = new RestTemplate();
-    final ObjectMapper objectMapper;
     private final BookingRepository bookingRepository;
     private final GenreRepository genreRepository;
     private final CastRepository castRepository;
@@ -34,9 +32,7 @@ public class AIService {
     @Value("${ai.service.url:http://localhost:8000}")
     String aiServiceUrl;
 
-    /**
-     * Analyze revenue and booking patterns using AI
-     */
+    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Object> analyzeRevenue(List<Map<String, Object>> bookings, LocalDateTime fromDate, LocalDateTime toDate) {
         try {
             String url = aiServiceUrl + "/analyze-revenue";
@@ -70,9 +66,7 @@ public class AIService {
         }
     }
 
-    /**
-     * Generate optimized show schedule using AI
-     */
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Map<String, Object>> optimizeSchedule(
             List<Map<String, Object>> movies,
             List<Map<String, Object>> existingShows,
@@ -114,9 +108,7 @@ public class AIService {
         }
     }
 
-    /**
-     * Train AI model with historical data
-     */
+    @PreAuthorize("hasRole('ADMIN')")
     public boolean trainModel(List<Map<String, Object>> historicalBookings) {
         try {
             String url = aiServiceUrl + "/train-model";
@@ -141,10 +133,8 @@ public class AIService {
         }
     }
 
-    /**
-     * Predict demand for specific time slot
-     */
-    public Map<String, Object> predictDemand(int hour, int dayOfWeek, boolean isWeekend) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public Map predictDemand(int hour, int dayOfWeek, boolean isWeekend) {
         try {
             String url = String.format(
                     "%s/predict-demand?hour=%d&day_of_week=%d&is_weekend=%b",
@@ -165,9 +155,7 @@ public class AIService {
         }
     }
 
-    /**
-     * Check if AI service is available
-     */
+    @PreAuthorize("hasRole('ADMIN')")
     public boolean isAIServiceAvailable() {
         try {
             String url = aiServiceUrl + "/";
@@ -179,9 +167,7 @@ public class AIService {
         }
     }
 
-    /**
-     * Fallback analysis when AI service is unavailable
-     */
+
     private Map<String, Object> createFallbackAnalysis() {
         Map<String, Object> analysis = new HashMap<>();
         analysis.put("insights", Arrays.asList(
@@ -189,12 +175,12 @@ public class AIService {
                 "Using basic analytics"
         ));
         analysis.put("patterns", Collections.emptyMap());
-        analysis.put("recommendations", Arrays.asList(
+        analysis.put("recommendations", List.of(
                 "Enable AI service for advanced insights"
         ));
         return analysis;
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Map<String, Object>> prepareBookingsData(LocalDateTime fromDate, LocalDateTime toDate) {
         List<Map<String, Object>> result = new ArrayList<>();
         List<Object[]> rows = bookingRepository.getBookingDataForAI(fromDate,toDate);
@@ -220,7 +206,7 @@ public class AIService {
 
         return result;
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Map<String, Object>> prepareMoviesData() {
         List<Map<String,Object>> result = new ArrayList<>();
         List<Movie> movies = movieRepository.findAll();
@@ -233,13 +219,16 @@ public class AIService {
             map.put("genreIds",genreIds);
             map.put("castIds",castIds);
             map.put("runtime",movie.getRuntime());
-            map.put("popularity",movie.getVoteCount());
+            map.put("popularity",0);
+            map.put("voteAverage",movie.getVoteAverage());
+            map.put("voteCount", movie.getVoteCount());
+            map.put("releaseDate",movie.getReleaseDate().toString());
 
             result.add(map);
         }
         return result;
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Map<String, Object>> prepareShowsData() {
         List<Map<String,Object>> result = new ArrayList<>();
         List<Show> shows = showRepository.findAll();

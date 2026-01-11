@@ -4,12 +4,15 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import com.longtapcode.identity_service.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.longtapcode.identity_service.constant.PredefinedRole;
@@ -30,6 +33,8 @@ public class ApplicationInitConfig {
     UserRepository userRepository;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
+    BookingRepository bookingRepository;
+    StringRedisTemplate redisTemplate;
 
     @NonFinal
     @Value("${jwt.admin_password}")
@@ -61,6 +66,17 @@ public class ApplicationInitConfig {
                         .build();
                 userRepository.save(user);
             }
+        };
+    }
+
+    @Bean
+    public ApplicationRunner initBookedSeats(){
+        return args ->{
+                List<Object[]> redisDataList = bookingRepository.findAllByBookingConfirmed();
+                for(Object[] redisData : redisDataList){
+                    String key = "booked:"+ redisData[1] +":" +redisData[2];
+                    redisTemplate.opsForValue().setIfAbsent(key, redisData[0].toString());
+                }
         };
     }
 }

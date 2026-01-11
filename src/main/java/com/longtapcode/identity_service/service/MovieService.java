@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -80,7 +81,7 @@ public class MovieService {
     }
 
     //For Admin
-
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<MovieResponse> getAllMoviesForAdmin(int page,int size, String search) {
         Page<Movie> movies;
         Pageable pageable = PageRequest.of(page, size);
@@ -92,7 +93,7 @@ public class MovieService {
         return movies.map(movieMapper::toMovieResponse);
     }
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     public MovieResponse createMovie(MovieRequest request) {
         Movie movie = movieMapper.toMovie(request);
 
@@ -108,7 +109,7 @@ public class MovieService {
 
         return movieMapper.toMovieResponse(movieRepository.save(movie));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public MovieResponse updateMovie(Long movieId, UpdateMovieRequest request) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
@@ -127,7 +128,7 @@ public class MovieService {
 
         return movieMapper.toMovieResponse(movieRepository.save(movie));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteMovieById(Long id){
         if(!movieRepository.existsById(id)) {
             throw new AppException(ErrorCode.MOVIE_NOT_EXISTED);

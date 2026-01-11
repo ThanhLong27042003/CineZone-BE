@@ -13,6 +13,7 @@ import com.longtapcode.identity_service.repository.ShowRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class SeatService {
         List<Seat> seats = seatRepository.findAll();
         return seatMapper.toListSeatResponse(seats);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public SeatResponse createSeat(SeatRequest seatRequest){
         Seat seat = seatMapper.toSeat(seatRequest);
         seatRepository.save(seat);

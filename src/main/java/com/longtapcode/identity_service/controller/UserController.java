@@ -29,7 +29,6 @@ public class UserController {
     UserService userService;
 
     @PutMapping("/updateUser/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<String> updateUser(
             @PathVariable("id") String id, @RequestBody @Valid UpdateUserRequest request) {
         userService.updateUserService(id, request);

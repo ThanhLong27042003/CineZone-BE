@@ -11,6 +11,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -55,30 +56,22 @@ public class EmailService {
                 return;
             }
 
-            // Send booking confirmation email
             sendBookingConfirmationEmail(event);
 
-            // Acknowledge message
             acknowledgment.acknowledge();
             log.info("✅ Email sent successfully for booking: {}", event.getBookingId());
 
         } catch (Exception e) {
             log.error("❌ Failed to send email for booking: {}", event.getBookingId(), e);
-            // Don't acknowledge - message will be retried
             throw new RuntimeException("Email sending failed", e);
         }
     }
 
-    /**
-     * Send booking confirmation email
-     */
     public void sendBookingConfirmationEmail(BookingConfirmedEvent event) throws MessagingException {
         log.info("Preparing email for booking: {}", event.getBookingId());
 
-        // Prepare template variables
         Map<String, Object> variables = buildEmailVariables(event);
 
-        // Generate HTML content from template
         String htmlContent = templateEngine.process("email/booking-confirmation",
                 createContext(variables));
 
@@ -95,9 +88,7 @@ public class EmailService {
         log.info("Email sent to: {}", event.getUserEmail());
     }
 
-    /**
-     * Build template variables
-     */
+
     private Map<String, Object> buildEmailVariables(BookingConfirmedEvent event) {
         Map<String, Object> variables = new HashMap<>();
 
@@ -136,18 +127,12 @@ public class EmailService {
         return variables;
     }
 
-    /**
-     * Create Thymeleaf context
-     */
     private Context createContext(Map<String, Object> variables) {
         Context context = new Context();
         context.setVariables(variables);
         return context;
     }
 
-    /**
-     * Format helpers
-     */
     private String formatPrice(Long cents) {
         if (cents == null) return "$0.00";
         BigDecimal dollars = BigDecimal.valueOf(cents).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
@@ -23,7 +24,6 @@ public class KafkaProducerService {
 
     @Value("${spring.kafka.topics.booking-confirmed}")
     String bookingConfirmedTopic;
-
     public void publishBookingConfirmed(BookingConfirmedEvent event){
         log.info("Publishing BookingConfirmedEvent to Kafka - BookingId: {}, OrderId: {}",event.getBookingId(), event.getOrderId());
 

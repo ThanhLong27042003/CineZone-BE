@@ -79,4 +79,6 @@ Page<Booking> findAllWithFilters(
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate
     );
+    @Query("SELECT b.id1.id,b.showID.id,bd.seatNumber FROM Booking b JOIN BookingDetail bd ON bd.bookingID = b WHERE b.status = 'CONFIRMED'")
+    List<Object[]> findAllByBookingConfirmed();
 }

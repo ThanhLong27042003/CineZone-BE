@@ -10,6 +10,7 @@ import com.longtapcode.identity_service.repository.RoleRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,20 +38,20 @@ public class UserService {
     PasswordEncoder passwordEncoder;
     private final MovieRepository movieRepository;
     private final RoleRepository roleRepository;
-
+    @PreAuthorize("hasRole('ADMIN')")
     public void updateUserService(String id, UpdateUserRequest request) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         userMapper.updateUser(user, request);
         userRepository.save(user);
     }
-
+    @PreAuthorize("#userId == authentication.principal.claims['userId']")
     public void addFavoriteMovie(String userId, Long movieId){
         User user = userRepository.findById(userId).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
         Movie movie = movieRepository.findById(movieId).orElseThrow(()->new AppException(ErrorCode.MOVIE_NOT_EXISTED));
             user.getFavoriteMovies().add(movie);
             userRepository.save(user);
     }
-
+    @PreAuthorize("#userId == authentication.principal.claims['userId']")
     public void removeFavoriteMovie(String userId, Long movieId){
         User user = userRepository.findById(userId).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
         user.getFavoriteMovies().removeIf(m -> m.getId().equals(movieId));
@@ -58,7 +59,7 @@ public class UserService {
 
     }
 
-    // For admin
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<UserResponse> getAllUsersForAdmin(int page, int size) {
         Pageable pageable = PageRequest.of(page,size);
         Page<User> users = userRepository.findAll(pageable);
@@ -80,7 +81,7 @@ public class UserService {
         userRepository.save(user);
         return userMapper.toUserResponse(user);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse updateUser(String userId, AdminUpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -94,12 +95,12 @@ public class UserService {
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getUserById(String id) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return userMapper.toUserResponse(user);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public String lockUser(String id) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         user.toggleLock();
@@ -110,7 +111,4 @@ public class UserService {
             return "This account is unlocked";
         }
     }
-
-
-
 }

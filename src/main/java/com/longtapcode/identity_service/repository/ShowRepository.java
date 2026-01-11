@@ -39,7 +39,7 @@ public interface ShowRepository extends JpaRepository<Show,Long> {
 
     @Query("""
         SELECT s FROM Show s
-        WHERE s.roomId.roomId = :roomId
+        WHERE (:roomId IS NULL OR s.roomId.roomId = :roomId)
         AND s.showDateTime BETWEEN :startDate AND :endDate
         ORDER BY s.showDateTime ASC
     """)

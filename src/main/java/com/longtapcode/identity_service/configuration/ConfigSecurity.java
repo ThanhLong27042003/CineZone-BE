@@ -29,21 +29,17 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConfigSecurity {
-    static final String[] PUBLIC_ENDPOINTS = {"/auth/log-in", "/auth/refreshToken", "/movie/**" ,"/show/**","/cast/**", "/seat/**","/user/createUser","/general/**","/payment/**","/admin/**","/genre/**","/role/**"};
-
+    static final String[] PUBLIC_GET_ENDPOINTS = {"/movie/**" ,"/show/**","/cast/**", "/seat/**","/general/**","/payment/**","/genre/**"};
+    static final String[] PUBLIC_POST_ENDPOINTS = {"/auth/log-in", "/auth/refreshToken","/user/createUser"};
     CustomJwtDecoder customJwtDecoder;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+                .authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
                 .permitAll()
-                .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS)
-                .permitAll()
-                .requestMatchers(HttpMethod.PUT, PUBLIC_ENDPOINTS)
-                .permitAll()
-                .requestMatchers(HttpMethod.DELETE, PUBLIC_ENDPOINTS)
+                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
                 .permitAll()
                         .requestMatchers("/ws/**")
                         .permitAll()

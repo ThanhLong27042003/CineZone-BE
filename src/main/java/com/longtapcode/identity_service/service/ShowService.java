@@ -21,6 +21,7 @@ import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -56,7 +57,7 @@ public class ShowService {
         return showMapper.toListShowResponse(shows);
     }
 
-    // For admin
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<ShowResponse> getAllShowsForAdmin(int page, int size, Long movieId, LocalDateTime dateTime) {
         Page<Show> shows;
         Pageable pageable = PageRequest.of(page, size);
@@ -73,7 +74,7 @@ public class ShowService {
 
         return shows.map(showMapper::toShowResponse);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public void createShow(ShowRequest request) {
         // Validate movie exists
         Movie movie = movieRepository.findById(request.getMovieId())
@@ -110,7 +111,7 @@ public class ShowService {
                 movie.getTitle(), room.getName(), startTime);
 
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public void updateShow(Long showId, UpdateShowRequest request) {
         Show show = showRepository.findById(showId)
                 .orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
@@ -158,7 +159,7 @@ public class ShowService {
         log.info("Updated show {}: Movie={}, Room={}, Time={}",
                 showId, movie.getTitle(), room.getName(), startTime);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteShow(Long showId) {
         Show show = showRepository.findById(showId)
                 .orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));

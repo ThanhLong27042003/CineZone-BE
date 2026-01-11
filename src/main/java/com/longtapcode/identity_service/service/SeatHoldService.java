@@ -14,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -43,7 +44,7 @@ public class SeatHoldService {
             end
             """, Long.class
     );
-
+    @PreAuthorize("#request.userId == authentication.principal.claims['userId']")
     public SeatUpdateSuccess holdSeat(SeatHoldRequest request) {
         Long showId = request.getShowId();
         String seatNumber = request.getSeatNumber();
@@ -105,7 +106,7 @@ public class SeatHoldService {
         String key = "hold:" + showId + ":" + seatNumber;
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
-
+    @PreAuthorize("#request.userId == authentication.principal.claims['userId']")
     public SeatUpdateSuccess releaseSeat(SeatHoldRequest request) {
         Long showId = request.getShowId();
         String seatNumber = request.getSeatNumber();

@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -105,6 +106,7 @@ public class AuthenticationService {
                         .plus(isRefresh ? refreshableDuration : validationDuration, ChronoUnit.SECONDS)
                         .toEpochMilli()))
                 .claim("scope", isRefresh ? "" : buildScope(user.getRoles()))
+                .claim("userId",user.getId())
                 .jwtID(tokenId)
                 .build();
         Payload payload = new Payload(claimsSet.toJSONObject());
@@ -177,7 +179,7 @@ public class AuthenticationService {
                 .build();
         res.addHeader("Set-Cookie", cookie.toString());
     }
-
+    @PreAuthorize("#request.userName == authentication.name")
     public void logOut (HttpServletResponse res,AuthenticationRequest request){
         var context = SecurityContextHolder.getContext();
         String userName = context.getAuthentication().getName();
@@ -186,7 +188,6 @@ public class AuthenticationService {
             clearRefreshTokenCookie(res);
         }
     }
-
 
     public String extractRefreshToken(HttpServletRequest request) {
         if (request.getCookies() != null) {

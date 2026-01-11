@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +38,7 @@ public class PaymentService {
     private final PayPalService payPalService;
 
     private final KafkaProducerService kafkaProducerService;
-
+    @PreAuthorize("#request.userId == authentication.principal.claims['userId']")
     public PaymentCreateResponse createPayment(PaymentCreateRequest request, HttpServletRequest httpRequest) {
         log.info("Creating payment - Method: {}, ShowId: {}, User: {}",
                 request.getPaymentMethod(), request.getShowId(), request.getUserId());
