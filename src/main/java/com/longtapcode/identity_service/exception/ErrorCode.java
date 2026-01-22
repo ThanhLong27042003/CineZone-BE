@@ -41,7 +41,9 @@ public enum ErrorCode {
     ACCOUNT_IS_LOCKED(1027,"This account is locked. Please contact an administrator for help",HttpStatus.BAD_REQUEST),
     ROOM_NOT_EXISTED(1028,"Room is not existed",HttpStatus.BAD_REQUEST),
     ROOM_EXISTED(1029,"Room already exists",HttpStatus.BAD_REQUEST),
-    SHOW_OVERLAP(1030,"Show time overlaps with existing show in the same room",HttpStatus.BAD_REQUEST);
+    SHOW_OVERLAP(1030,"Show time overlaps with existing show in the same room",HttpStatus.BAD_REQUEST),
+    SHOW_ALREADY_PASSED(1031, "Show has already been screened",HttpStatus.BAD_REQUEST),
+    INVALID_SHOW_TIME(1032, "Cannot create show in the past",HttpStatus.BAD_REQUEST);
     final int code;
     final String message;
     final HttpStatus statusCode;

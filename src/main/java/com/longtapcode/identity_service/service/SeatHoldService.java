@@ -106,7 +106,7 @@ public class SeatHoldService {
         String key = "hold:" + showId + ":" + seatNumber;
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
-    @PreAuthorize("#request.userId == authentication.principal.claims['userId']")
+
     public SeatUpdateSuccess releaseSeat(SeatHoldRequest request) {
         Long showId = request.getShowId();
         String seatNumber = request.getSeatNumber();

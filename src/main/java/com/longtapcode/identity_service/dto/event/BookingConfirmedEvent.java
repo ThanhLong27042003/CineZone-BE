@@ -31,6 +31,7 @@ public class BookingConfirmedEvent implements Serializable {
     LocalDateTime showDateTime;
 
     Set<SeatInfoEvent> seats;
+    String roomName;
 
     LocalDateTime eventTime;
 

@@ -31,7 +31,7 @@ public class PayPalService {
     private final RedisTemplate<String, String> redisTemplate;
 
 
-    public PaymentCreateResponse createPayPalOrder(PaymentCreateRequest request) {
+    public PaymentCreateResponse createPayPalOrder(PaymentCreateRequest request, String orderId) {
         log.info("Creating PayPal order for showId: {}, user: {}", request.getShowId(), request.getUserId());
 
         // 1. Get show info
@@ -52,9 +52,6 @@ public class PayPalService {
                 .longValue();
 
         log.info("PayPal order amount: ${} ({} cents)", totalAmountStr, totalAmountCents);
-
-        // 3. Generate orderId để lưu metadata
-        String orderId = UUID.randomUUID().toString();
 
         // 4. Build PayPal Order Request
         OrderRequest orderRequest = new OrderRequest();
@@ -174,11 +171,9 @@ public class PayPalService {
             Long amountCents;
 
             try {
-                // Try to parse as Long directly
                 amountCents = Long.parseLong(amountStr);
                 log.info("Parsed amount from metadata: {} cents", amountCents);
             } catch (NumberFormatException e) {
-                // Fallback: if somehow still decimal format, convert it
                 log.warn("Amount in metadata is decimal format: {}, converting...", amountStr);
                 BigDecimal decimalAmount = new BigDecimal(amountStr);
                 amountCents = decimalAmount.multiply(BigDecimal.valueOf(100))

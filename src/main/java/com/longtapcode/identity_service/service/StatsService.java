@@ -10,6 +10,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -68,9 +70,9 @@ public class StatsService {
         LocalDateTime today = LocalDateTime.now();
         LocalDateTime endOfDay = LocalDateTime.now().withYear(2028);
 
-        // Get top 3 movies by booking count (last 7 days)
+        Pageable pageable = PageRequest.of(0,10);
         LocalDateTime last7Days = today.minusDays(7);
-        List<Object[]> topMoviesData = bookingRepository.getTopMoviesByBookings(last7Days, today, 5);
+        List<Object[]> topMoviesData = bookingRepository.getTopMoviesByBookings(last7Days, today, pageable);
         List<Map<String, Object>> trendingMovies = new ArrayList<>();
 
         for (Object[] data : topMoviesData) {
@@ -85,7 +87,7 @@ public class StatsService {
 
             // Get today's shows for this movie
             List<Show> todayShows = showRepository.findByRoomAndDateRange(
-                            null, // all rooms
+                            null,
                             today,
                             endOfDay
                     ).stream()

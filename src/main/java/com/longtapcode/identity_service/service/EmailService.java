@@ -116,6 +116,7 @@ public class EmailService {
                 .map(SeatInfoEvent::getSeatNumber)
                 .reduce((a, b) -> a + ", " + b)
                 .orElse("N/A"));
+        variables.put("roomName",event.getRoomName());
 
         // Links
         variables.put("viewBookingUrl", frontendUrl + "/my-bookings");

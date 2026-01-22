@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -63,7 +64,7 @@ Page<Booking> findAllWithFilters(
     List<Object[]> getTopMoviesByBookings(
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate,
-            @Param("limit") int limit);
+            Pageable pageable);
 
     @Query("SELECT b.id, u.id, s.id, m.id, m.title, s.showDateTime, b.totalPrice, " +
             "(SELECT COUNT(bd.id) AS seatCount FROM BookingDetail bd WHERE bd.bookingID = b), " +
@@ -81,4 +82,8 @@ Page<Booking> findAllWithFilters(
     );
     @Query("SELECT b.id1.id,b.showID.id,bd.seatNumber FROM Booking b JOIN BookingDetail bd ON bd.bookingID = b WHERE b.status = 'CONFIRMED'")
     List<Object[]> findAllByBookingConfirmed();
+
+    Optional<Booking> findByOrderId(String orderId);
+
+    List<Booking> findByStatusAndBookingDateBefore(String status, LocalDateTime date);
 }

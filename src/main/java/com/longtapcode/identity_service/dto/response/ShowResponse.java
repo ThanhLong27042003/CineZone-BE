@@ -18,4 +18,5 @@ public class ShowResponse {
     LocalDate showDate;
     LocalTime showTime;
     BigDecimal price;
+    String showStatus;
 }

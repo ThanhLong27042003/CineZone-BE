@@ -30,7 +30,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConfigSecurity {
     static final String[] PUBLIC_GET_ENDPOINTS = {"/movie/**" ,"/show/**","/cast/**", "/seat/**","/general/**","/payment/**","/genre/**"};
-    static final String[] PUBLIC_POST_ENDPOINTS = {"/auth/log-in", "/auth/refreshToken","/user/createUser"};
+    static final String[] PUBLIC_POST_ENDPOINTS = {"/auth/log-in", "/auth/refreshToken","/user/createUser", "/seat/release"};
     CustomJwtDecoder customJwtDecoder;
 
     @Bean

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -102,6 +103,7 @@ public class BookingService {
     }
 
     public List<Object[]> getTopMovies(LocalDateTime fromDate, LocalDateTime toDate, int limit) {
-        return bookingRepository.getTopMoviesByBookings(fromDate, toDate, limit);
+        Pageable pageable = PageRequest.of(0, limit);
+        return bookingRepository.getTopMoviesByBookings(fromDate, toDate, pageable);
     }
 }
