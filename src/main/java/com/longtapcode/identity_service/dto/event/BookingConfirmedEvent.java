@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -18,7 +19,7 @@ public class BookingConfirmedEvent implements Serializable {
     long bookingId;
     String orderId;
     LocalDateTime bookingDate;
-    long totalPrice;
+    BigDecimal totalPrice;
     String paymentMethod;
     String transactionId;
 

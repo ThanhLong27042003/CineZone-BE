@@ -42,4 +42,9 @@ public class SeatService {
         List<Seat> seats = seatRepository.findByVip(vip).orElseThrow(()-> new AppException(ErrorCode.SEAT_NOT_EXISTED));
         return seatMapper.toListSeatResponse(seats);
     }
+
+    public SeatResponse getSeatBySeatNumber(String seatNumber){
+        Seat seat = seatRepository.findBySeatNumber(seatNumber).orElseThrow(()-> new AppException(ErrorCode.SEAT_NOT_EXISTED));
+        return seatMapper.toSeatResponse(seat);
+    }
 }

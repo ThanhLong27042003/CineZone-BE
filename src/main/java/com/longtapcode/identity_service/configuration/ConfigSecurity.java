@@ -43,6 +43,7 @@ public class ConfigSecurity {
                 .permitAll()
                         .requestMatchers("/ws/**")
                         .permitAll()
+                        .requestMatchers("/booking/**").authenticated()
                 .anyRequest()
                 .authenticated());
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer

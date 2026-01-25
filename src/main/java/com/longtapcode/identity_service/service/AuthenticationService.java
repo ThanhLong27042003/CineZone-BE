@@ -162,7 +162,7 @@ public class AuthenticationService {
         ResponseCookie cookie = ResponseCookie.from("refreshToken",refreshToken)
                 .httpOnly(true)
                 .path("/")
-                .maxAge(300)
+                .maxAge(30L*24*60*60)
                 .sameSite("Lax")
                 .secure(false)
                 .build();

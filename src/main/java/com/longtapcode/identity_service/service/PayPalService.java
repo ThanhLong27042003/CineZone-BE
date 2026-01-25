@@ -1,6 +1,7 @@
 package com.longtapcode.identity_service.service;
 
 import com.longtapcode.identity_service.configuration.PayPalConfig;
+import com.longtapcode.identity_service.constant.SeatInstanceStatus;
 import com.longtapcode.identity_service.dto.request.PaymentCreateRequest;
 import com.longtapcode.identity_service.dto.response.PaymentCreateResponse;
 import com.longtapcode.identity_service.entity.Show;
@@ -10,15 +11,19 @@ import com.longtapcode.identity_service.repository.ShowRepository;
 import com.paypal.core.PayPalHttpClient;
 import com.paypal.http.HttpResponse;
 import com.paypal.orders.*;
+import com.paypal.payments.RefundRequest;
+import com.paypal.payments.CapturesRefundRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,7 @@ public class PayPalService {
     private final PayPalConfig payPalConfig;
     private final ShowRepository showRepository;
     private final RedisTemplate<String, String> redisTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
 
 
     public PaymentCreateResponse createPayPalOrder(PaymentCreateRequest request, String orderId) {
@@ -41,8 +47,7 @@ public class PayPalService {
         // 2. Calculate amount
         int seatCount = request.getSeatNumbers().size();
         BigDecimal pricePerSeat = show.getPrice();
-        BigDecimal totalAmount = pricePerSeat.multiply(BigDecimal.valueOf(seatCount));
-
+        BigDecimal totalAmount = request.getAmount();
         // ✅ PayPal yêu cầu format: "10.00" (2 decimal places)
         String totalAmountStr = totalAmount.setScale(2, RoundingMode.HALF_UP).toString();
 
@@ -83,18 +88,6 @@ public class PayPalService {
                         )
                 );
 
-        // Items detail
-        List<Item> items = new ArrayList<>();
-        String seatList = String.join(", ", request.getSeatNumbers());
-        Item item = new Item()
-                .name("Movie Tickets")
-                .description("Seats: " + seatList)
-                .unitAmount(new Money().currencyCode("USD").value(pricePerSeat.setScale(2, RoundingMode.HALF_UP).toString()))
-                .quantity(String.valueOf(seatCount))
-                .category("DIGITAL_GOODS");
-        items.add(item);
-
-        purchaseUnit.items(items);
         purchaseUnits.add(purchaseUnit);
         orderRequest.purchaseUnits(purchaseUnits);
 
@@ -109,6 +102,13 @@ public class PayPalService {
             log.info("PayPal order created: {}", order.id());
 
             // 6. Lưu metadata vào Redis
+            String paymentSessionKey = "payment_session:" + order.id();
+            redisTemplate.opsForValue().set(
+                    paymentSessionKey,
+                    "PENDING",
+                    30,
+                    TimeUnit.MINUTES
+            );
             String metadataKey = "paypal_metadata:" + order.id();
             Map<String, String> metadata = new HashMap<>();
             metadata.put("orderId", orderId);
@@ -151,21 +151,40 @@ public class PayPalService {
         log.info("Capturing PayPal order: {}", paypalOrderId);
 
         OrdersCaptureRequest ordersCaptureRequest = new OrdersCaptureRequest(paypalOrderId);
+        String paymentSessionKey = "payment_session:" + paypalOrderId;
+        String sessionStatus = redisTemplate.opsForValue().get(paymentSessionKey);
 
+        if (sessionStatus == null || "EXPIRED".equals(sessionStatus)) {
+            throw new AppException(ErrorCode.SEAT_HOLD_EXPIRED);
+        }
+
+        // Get metadata từ Redis
+        String metadataKey = "paypal_metadata:" + paypalOrderId;
+        Map<Object, Object> rawMetadata = redisTemplate.opsForHash().entries(metadataKey);
+
+        if (rawMetadata.isEmpty()) {
+            log.error("Payment metadata not found for paypalOrderId: {}", paypalOrderId);
+            throw new AppException(ErrorCode.PAYMENT_NOT_FOUND);
+        }
+
+        String userId = (String) rawMetadata.get("userId");
+        Long showId = Long.parseLong((String) rawMetadata.get("showId"));
+        String[] seatNumbers = ((String) rawMetadata.get("seats")).split(",");
+        Set<String> seatNumberSet = Set.of(seatNumbers);
+        PaymentCreateResponse wsMessage = PaymentCreateResponse.builder()
+                .showId(showId)
+                .userId(userId)
+                .seatNumbers(seatNumberSet)
+                .status(SeatInstanceStatus.BOOKED.getStatus())
+                .expiresAt(0L)
+                .build();
+
+        messagingTemplate.convertAndSend("/topic/show/" + showId, wsMessage);
         try {
             HttpResponse<Order> response = payPalHttpClient.execute(ordersCaptureRequest);
             Order order = response.result();
 
             log.info("PayPal order captured: {}, Status: {}", order.id(), order.status());
-
-            // Get metadata từ Redis
-            String metadataKey = "paypal_metadata:" + paypalOrderId;
-            Map<Object, Object> rawMetadata = redisTemplate.opsForHash().entries(metadataKey);
-
-            if (rawMetadata.isEmpty()) {
-                log.error("Payment metadata not found for paypalOrderId: {}", paypalOrderId);
-                throw new AppException(ErrorCode.PAYMENT_NOT_FOUND);
-            }
 
             String amountStr = (String) rawMetadata.get("amount");
             Long amountCents;
@@ -206,6 +225,7 @@ public class PayPalService {
 
             // Clean up metadata
             redisTemplate.delete(metadataKey);
+            redisTemplate.delete(paymentSessionKey);
             log.info("Deleted metadata from Redis: {}", metadataKey);
 
             return result;
@@ -213,6 +233,45 @@ public class PayPalService {
         } catch (IOException e) {
             log.error("Failed to capture PayPal order: {}", paypalOrderId, e);
             throw new RuntimeException("PayPal capture failed", e);
+        }
+    }
+
+    // Thêm method refund vào PayPalService.java
+    public Map<String, Object> refundPayPalPayment(String transactionId, BigDecimal amount) {
+        log.info("Processing PayPal refund - Transaction: {}, Amount: {} cents", transactionId, amount);
+
+        try {
+
+            String refundAmountStr = amount.toString();
+
+            // Build refund request
+            RefundRequest refundRequest = new RefundRequest();
+            Money money = new Money();
+            money.currencyCode("USD");
+            money.value(refundAmountStr);
+            refundRequest.amount();
+
+            // Create refund
+            CapturesRefundRequest capturesRefundRequest = new CapturesRefundRequest(transactionId);
+            capturesRefundRequest.requestBody(refundRequest);
+
+            HttpResponse<com.paypal.payments.Refund> response = payPalHttpClient.execute(capturesRefundRequest);
+            com.paypal.payments.Refund refund = response.result();
+
+            log.info("PayPal refund successful - Refund ID: {}, Status: {}",
+                    refund.id(), refund.status());
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", "COMPLETED".equals(refund.status()));
+            result.put("refundId", refund.id());
+            result.put("status", refund.status());
+            result.put("amount", amount);
+
+            return result;
+
+        } catch (IOException e) {
+            log.error("Failed to refund PayPal payment: {}", transactionId, e);
+            throw new RuntimeException("PayPal refund failed: " + e.getMessage(), e);
         }
     }
 }

@@ -2,6 +2,7 @@ package com.longtapcode.identity_service.service;
 
 import com.longtapcode.identity_service.constant.SeatInstanceStatus;
 import com.longtapcode.identity_service.dto.request.SeatHoldRequest;
+import com.longtapcode.identity_service.dto.response.SeatResponse;
 import com.longtapcode.identity_service.dto.response.SeatUpdateResponse;
 import com.longtapcode.identity_service.dto.response.SeatUpdateSuccess;
 import com.longtapcode.identity_service.repository.BookingDetailRepository;
@@ -27,6 +28,7 @@ public class SeatHoldService {
 
     StringRedisTemplate redisTemplate;
     SimpMessagingTemplate messagingTemplate;
+    SeatService seatService;
 
     // ==================== LUA SCRIPT ĐỂ HOLD GHẾ ====================
     private final DefaultRedisScript<Long> holdSeatScript = new DefaultRedisScript<>(
@@ -66,11 +68,12 @@ public class SeatHoldService {
             if(result == 1){
                 Long ttl = getSeatTTL(showId, seatNumber);
                 long expiresAt = System.currentTimeMillis() + (ttl != null ? ttl * 1000 : 0);
-
+                SeatResponse seatResponse = seatService.getSeatBySeatNumber(seatNumber);
                 SeatUpdateResponse message = SeatUpdateResponse.builder()
                         .showId(request.getShowId())
                         .userId(userId)
                         .seatNumber(request.getSeatNumber())
+                        .seatType(seatResponse.getVip())
                         .status(SeatInstanceStatus.HELD.getStatus())
                         .expiresAt(expiresAt)
                         .build();
@@ -146,10 +149,13 @@ public class SeatHoldService {
             holdKeys.forEach(key->{
                 Long ttl = redisTemplate.getExpire(key,TimeUnit.SECONDS);
                 String userId = redisTemplate.opsForValue().get(key);
+                String seatNumber = key.split(":")[2];
+                SeatResponse seatResponse = seatService.getSeatBySeatNumber(seatNumber);
                 seatUpdateResponses.add(SeatUpdateResponse.builder()
                         .showId(showId)
                         .userId(userId)
-                        .seatNumber(key.split(":")[2])
+                        .seatNumber(seatNumber)
+                        .seatType(seatResponse.getVip())
                         .status(SeatInstanceStatus.HELD.getStatus())
                         .expiresAt(System.currentTimeMillis() + (ttl != null ? ttl * 1000 : 0 ))
                         .build());

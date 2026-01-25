@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Data
@@ -16,7 +17,7 @@ public class PaymentCreateRequest {
      Long showId;
      Set<String> seatNumbers;
      String userId;
-     Long amount;
+     BigDecimal amount;
      String paymentMethod;
      String returnUrl;
 

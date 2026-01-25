@@ -86,4 +86,6 @@ Page<Booking> findAllWithFilters(
     Optional<Booking> findByOrderId(String orderId);
 
     List<Booking> findByStatusAndBookingDateBefore(String status, LocalDateTime date);
+    List<Booking> findTop10ById1_IdOrderByBookingDateDesc(String userId);
+
 }

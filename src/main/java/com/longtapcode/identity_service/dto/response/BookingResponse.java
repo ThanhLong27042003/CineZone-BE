@@ -3,6 +3,7 @@ package com.longtapcode.identity_service.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -21,7 +22,7 @@ public class BookingResponse {
     String movieTitle;
     LocalDateTime showDateTime;
     String paymentMethod;
-    Long totalPrice;
+    BigDecimal totalPrice;
     String status;
     LocalDateTime bookingDate;
     Set<BookingDetailResponse> bookingDetails;

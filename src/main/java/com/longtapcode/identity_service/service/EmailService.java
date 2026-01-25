@@ -134,9 +134,9 @@ public class EmailService {
         return context;
     }
 
-    private String formatPrice(Long cents) {
+    private String formatPrice(BigDecimal cents) {
         if (cents == null) return "$0.00";
-        BigDecimal dollars = BigDecimal.valueOf(cents).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal dollars = cents.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         return "$" + dollars.toString();
     }
 

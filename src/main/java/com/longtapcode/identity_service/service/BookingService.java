@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -105,5 +107,60 @@ public class BookingService {
     public List<Object[]> getTopMovies(LocalDateTime fromDate, LocalDateTime toDate, int limit) {
         Pageable pageable = PageRequest.of(0, limit);
         return bookingRepository.getTopMoviesByBookings(fromDate, toDate, pageable);
+    }
+    /**
+     * Lấy danh sách booking của 1 user
+     */
+    public List<BookingResponse> getBookingsByUserId(String userId) {
+
+        List<Booking> bookings =
+                bookingRepository.findTop10ById1_IdOrderByBookingDateDesc(userId);
+
+        return bookings.stream()
+                .map(bookingMapper::toBookingResponse)
+                .collect(Collectors.toList());
+    }
+
+
+    /**
+     * Hủy booking bởi user (chỉ cho phép nếu chưa quá giờ chiếu)
+     */
+    @Transactional
+    public BookingResponse cancelBookingByUser(Long bookingId, String userId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+
+        // Check quyền sở hữu
+        if (!booking.getId1().getId().equals(userId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Check trạng thái
+        if ("CANCELLED".equals(booking.getStatus())) {
+            throw new AppException(ErrorCode.BOOKING_ALREADY_CANCELLED);
+        }
+
+        // Check thời gian (chỉ cho phép hủy trước giờ chiếu ít nhất 2h)
+        LocalDateTime showTime = booking.getShowID().getShowDateTime();
+        LocalDateTime now = LocalDateTime.now();
+
+        if (now.plusHours(2).isAfter(showTime)) {
+            throw new AppException(ErrorCode.CANNOT_CANCEL_BOOKING);
+        }
+
+        booking.setStatus("CANCELLED");
+
+        // TODO: Hoàn tiền nếu cần
+
+        log.info("User {} cancelled booking: {}", userId, bookingId);
+
+        return bookingMapper.toBookingResponse(bookingRepository.save(booking));
+    }
+
+    // Thêm vào BookingService.java
+    private final BookingCancellationService cancellationService;
+
+    public Map<String, Object> cancelMyBookingWithRefund(Long bookingId) {
+        return cancellationService.cancelBookingWithRefund(bookingId);
     }
 }

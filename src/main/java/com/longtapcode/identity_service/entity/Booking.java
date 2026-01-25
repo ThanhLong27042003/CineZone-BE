@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,8 +39,11 @@ public class Booking {
     @Column(name = "payment_method")
     String paymentMethod;
 
-    @Column(name = "total_price")
-    Long totalPrice;
+    @Column(name = "transaction_id")
+    String transactionId;
+
+    @Column(name = "total_price", precision = 10, scale = 2)
+    BigDecimal totalPrice;
 
     @Column(name = "status")
     String status;

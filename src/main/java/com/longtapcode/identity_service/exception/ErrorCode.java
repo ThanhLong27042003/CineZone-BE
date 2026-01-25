@@ -43,7 +43,9 @@ public enum ErrorCode {
     ROOM_EXISTED(1029,"Room already exists",HttpStatus.BAD_REQUEST),
     SHOW_OVERLAP(1030,"Show time overlaps with existing show in the same room",HttpStatus.BAD_REQUEST),
     SHOW_ALREADY_PASSED(1031, "Show has already been screened",HttpStatus.BAD_REQUEST),
-    INVALID_SHOW_TIME(1032, "Cannot create show in the past",HttpStatus.BAD_REQUEST);
+    INVALID_SHOW_TIME(1032, "Cannot create show in the past",HttpStatus.BAD_REQUEST),
+    CANNOT_CANCEL_BOOKING(1433, "Cannot cancel booking less than 2 hours before show time",HttpStatus.BAD_REQUEST),
+    SEAT_HOLD_EXPIRED(1434, "Your seat reservation has expired. Please select seats again to continue payment!!!",HttpStatus.BAD_REQUEST);
     final int code;
     final String message;
     final HttpStatus statusCode;

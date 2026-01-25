@@ -12,6 +12,7 @@ public class SeatUpdateResponse {
     Long showId;
     String userId;
     String seatNumber;
+    int seatType;
     String status;
     Long expiresAt;
 }

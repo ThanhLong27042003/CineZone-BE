@@ -202,8 +202,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -395,5 +396,71 @@ public class ShowService {
         }
 
         showRepository.deleteById(showId);
+    }
+
+    /**
+     * Lấy tất cả suất chiếu theo ngày, nhóm theo phim
+     */
+    public Map<String, List<ShowResponse>> getShowsByDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(23, 59, 59);
+
+        List<Show> shows = showRepository.findByRoomAndDateRange(
+                null,
+                startOfDay,
+                endOfDay
+        );
+
+        // Lọc chỉ lấy show chưa chiếu
+        List<Show> upcomingShows = shows.stream()
+                .filter(show -> show.getShowDateTime().isAfter(LocalDateTime.now()))
+                .sorted(Comparator.comparing(Show::getShowDateTime))
+                .collect(Collectors.toList());
+
+        // Nhóm theo phim
+        Map<String, List<ShowResponse>> groupedByMovie = upcomingShows.stream()
+                .map(showMapper::toShowResponse)
+                .collect(Collectors.groupingBy(
+                        response -> {
+                            Show show = shows.stream()
+                                    .filter(s -> s.getId().equals(response.getShowId()))
+                                    .findFirst()
+                                    .orElse(null);
+                            return show != null ? show.getMovieID().getTitle() : "Unknown";
+                        }
+                ));
+
+        log.info("Found {} movies with shows on {}", groupedByMovie.size(), date);
+        return groupedByMovie;
+    }
+
+    /**
+     * Lấy danh sách các ngày có suất chiếu trong 30 ngày tới
+     */
+    public List<LocalDate> getAvailableDates(Long movieId) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime futureDate = now.plusDays(30);
+
+        List<Show> shows;
+        if (movieId != null) {
+            Movie movie = movieRepository.findById(movieId)
+                    .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+            shows = showRepository.findByMovieID(movie)
+                    .orElse(Collections.emptyList());
+        } else {
+            shows = showRepository.findByRoomAndDateRange(null, now, futureDate);
+        }
+
+        // Lấy danh sách ngày duy nhất
+        Set<LocalDate> uniqueDates = shows.stream()
+                .filter(show -> show.getShowDateTime().isAfter(now))
+                .map(show -> show.getShowDateTime().toLocalDate())
+                .collect(Collectors.toSet());
+
+        List<LocalDate> sortedDates = new ArrayList<>(uniqueDates);
+        Collections.sort(sortedDates);
+
+        log.info("Found {} available dates", sortedDates.size());
+        return sortedDates;
     }
 }
