@@ -197,6 +197,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -255,7 +256,7 @@ public class ShowService {
         // Chỉ lấy show chưa chiếu
         List<Show> upcomingShows = shows.stream()
                 .filter(show -> show.getShowDateTime().isAfter(now))
-                .sorted((s1, s2) -> s1.getShowDateTime().compareTo(s2.getShowDateTime()))
+                .sorted(Comparator.comparing(Show::getShowDateTime))
                 .collect(Collectors.toList());
 
         return showMapper.toListShowResponse(upcomingShows);
@@ -265,13 +266,13 @@ public class ShowService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public Page<ShowResponse> getAllShowsForAdmin(int page, int size, Long movieId, LocalDateTime dateTime) {
-        Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size);
         Page<Show> shows;
 
         if (movieId != null && dateTime != null) {
-            shows = showRepository.findByMovieIDAndShowDateTime(movieId, dateTime, pageable);
+            shows = showRepository.findByMovieID_IdAndShowDateTime(movieId, dateTime, pageable);
         } else if (movieId != null) {
-            shows = showRepository.findByMovieID(movieId, pageable);
+            shows = showRepository.findByMovieID_Id(movieId, pageable);
         } else if (dateTime != null) {
             shows = showRepository.findByShowDateTime(dateTime, pageable);
         } else {

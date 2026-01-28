@@ -16,9 +16,9 @@ import java.util.Optional;
 @Repository
 public interface ShowRepository extends JpaRepository<Show,Long> {
     Optional<List<Show>> findByMovieID(Movie movieID);
-    Page<Show> findByMovieID(Long movieId, Pageable pageable);
+    Page<Show> findByMovieID_Id(Long movieId, Pageable pageable);
     Page<Show> findByShowDateTime(LocalDateTime dateTime, Pageable pageable);
-    Page<Show> findByMovieIDAndShowDateTime(Long movieId, LocalDateTime dateTime, Pageable pageable);
+    Page<Show> findByMovieID_IdAndShowDateTime(Long movieId, LocalDateTime dateTime, Pageable pageable);
 
     @Query(value = """
         SELECT COUNT(*)
