@@ -44,6 +44,9 @@ import com.longtapcode.identity_service.repository.CastRepository;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +62,18 @@ public class CastService {
     public List<CastResponse> getAllCast(){
         return castMapper.toListCastResponse(castRepository.findAll());
     }
+
+    public Page<CastResponse> getAllCasts(int page, int size, String search) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Cast> castPage;
+        if (search != null && !search.isEmpty()) {
+            castPage = castRepository.findByNameContainingIgnoreCase(search, pageable);
+        } else {
+            castPage = castRepository.findAll(pageable);
+        }
+        return castPage.map(castMapper::toCastResponse);
+    }
+
     public List<CastResponse> searchCasts(String keyword){
         List<Cast> casts = castRepository.searchCasts(keyword);
         return castMapper.toListCastResponse(casts);

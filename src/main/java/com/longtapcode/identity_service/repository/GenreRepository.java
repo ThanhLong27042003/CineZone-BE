@@ -2,6 +2,8 @@ package com.longtapcode.identity_service.repository;
 
 import com.longtapcode.identity_service.entity.Genre;
 import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -17,5 +19,5 @@ public interface GenreRepository extends JpaRepository<Genre, Long> {
     WHERE m.id = :movieId
 """)
     List<Long> findGenreIdsByMovie(@Param("movieId") Long movieId);
-
+    Page<Genre> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }
