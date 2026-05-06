@@ -1,15 +1,17 @@
 package com.longtapcode.identity_service.controller.admin;
 
+import java.time.LocalDateTime;
+import java.util.*;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.longtapcode.identity_service.dto.request.ApiResponse;
 import com.longtapcode.identity_service.service.AIService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.*;
 
 @RestController
 @RequestMapping("/admin/ai")
@@ -26,8 +28,7 @@ public class AIController {
     @GetMapping("/analytics")
     public ApiResponse<Map<String, Object>> getAIAnalytics(
             @RequestParam(required = false) LocalDateTime fromDate,
-            @RequestParam(required = false) LocalDateTime toDate
-    ) {
+            @RequestParam(required = false) LocalDateTime toDate) {
         try {
             // Get bookings data
             List<Map<String, Object>> bookings = aiService.prepareBookingsData(fromDate, toDate);
@@ -36,8 +37,7 @@ public class AIController {
             Map<String, Object> analysis = aiService.analyzeRevenue(
                     bookings,
                     fromDate != null ? fromDate : LocalDateTime.of(2024, 1, 1, 0, 0),
-                    toDate != null ? toDate : LocalDateTime.of(2025, 12, 31, 23, 59, 59)
-            );
+                    toDate != null ? toDate : LocalDateTime.of(2025, 12, 31, 23, 59, 59));
 
             return ApiResponse.<Map<String, Object>>builder()
                     .result(analysis)
@@ -58,27 +58,21 @@ public class AIController {
      * Generate AI-optimized schedule for movies
      */
     @PostMapping("/optimize-schedule")
-    public ApiResponse<List<Map<String, Object>>> optimizeSchedule(
-            @RequestBody Map<String, Object> request
-    ) {
+    public ApiResponse<List<Map<String, Object>>> optimizeSchedule(@RequestBody Map<String, Object> request) {
         try {
             // Extract request parameters
             List<Integer> roomIds = (List<Integer>) request.get("rooms");
             Map<String, String> dateRange = (Map<String, String>) request.get("dateRange");
-            Map<String, Object> constraints = (Map<String, Object>) request.getOrDefault("constraints", new HashMap<>());
+            Map<String, Object> constraints =
+                    (Map<String, Object>) request.getOrDefault("constraints", new HashMap<>());
 
             // Get movies and existing shows
             List<Map<String, Object>> movies = aiService.prepareMoviesData();
             List<Map<String, Object>> existingShows = aiService.prepareShowsData();
 
             // Call AI service for optimization
-            List<Map<String, Object>> optimizedSchedule = aiService.optimizeSchedule(
-                    movies,
-                    existingShows,
-                    roomIds,
-                    dateRange,
-                    constraints
-            );
+            List<Map<String, Object>> optimizedSchedule =
+                    aiService.optimizeSchedule(movies, existingShows, roomIds, dateRange, constraints);
 
             return ApiResponse.<List<Map<String, Object>>>builder()
                     .result(optimizedSchedule)
@@ -112,9 +106,7 @@ public class AIController {
             result.put("dataPoints", historicalData.size());
             result.put("message", success ? "Model training started" : "Training failed");
 
-            return ApiResponse.<Map<String, Object>>builder()
-                    .result(result)
-                    .build();
+            return ApiResponse.<Map<String, Object>>builder().result(result).build();
 
         } catch (Exception e) {
             log.error("Failed to train model: {}", e.getMessage());
@@ -130,15 +122,10 @@ public class AIController {
      */
     @GetMapping("/predict-demand")
     public ApiResponse<Map<String, Object>> predictDemand(
-            @RequestParam int hour,
-            @RequestParam int dayOfWeek,
-            @RequestParam boolean isWeekend
-    ) {
+            @RequestParam int hour, @RequestParam int dayOfWeek, @RequestParam boolean isWeekend) {
         Map<String, Object> prediction = aiService.predictDemand(hour, dayOfWeek, isWeekend);
 
-        return ApiResponse.<Map<String, Object>>builder()
-                .result(prediction)
-                .build();
+        return ApiResponse.<Map<String, Object>>builder().result(prediction).build();
     }
 
     /**
@@ -151,12 +138,10 @@ public class AIController {
         Map<String, Object> status = new HashMap<>();
         status.put("available", available);
         status.put("service", "CineZone AI Service");
-        status.put("features", Arrays.asList(
-                "Revenue Analytics",
-                "Schedule Optimization",
-                "Demand Prediction",
-                "Pattern Recognition"
-        ));
+        status.put(
+                "features",
+                Arrays.asList(
+                        "Revenue Analytics", "Schedule Optimization", "Demand Prediction", "Pattern Recognition"));
 
         return ApiResponse.<Map<String, Object>>builder()
                 .result(status)

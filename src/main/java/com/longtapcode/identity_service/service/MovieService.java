@@ -1,5 +1,13 @@
 package com.longtapcode.identity_service.service;
 
+import java.util.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.longtapcode.identity_service.dto.request.admin.MovieRequest;
 import com.longtapcode.identity_service.dto.request.admin.UpdateMovieRequest;
 import com.longtapcode.identity_service.dto.response.MovieResponse;
@@ -11,18 +19,11 @@ import com.longtapcode.identity_service.repository.CastRepository;
 import com.longtapcode.identity_service.repository.GenreRepository;
 import com.longtapcode.identity_service.repository.MovieRepository;
 import com.longtapcode.identity_service.repository.UserRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
-
 
 @Service
 @RequiredArgsConstructor
@@ -35,54 +36,55 @@ public class MovieService {
     GenreRepository genreRepository;
     private final UserRepository userRepository;
 
-    public MovieResponse getMovieById(Long id){
+    public MovieResponse getMovieById(Long id) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
         return movieMapper.toMovieResponse(movie);
     }
-    public List<MovieResponse> getAllMovie(){
+
+    public List<MovieResponse> getAllMovie() {
         List<Movie> listMovie = movieRepository.findAll();
         return movieMapper.toListMovieResponse(listMovie);
     }
 
-
-    public List<List<MovieResponse>> getTopMovieForHomePage(List<String> genres){
+    public List<List<MovieResponse>> getTopMovieForHomePage(List<String> genres) {
         List<List<MovieResponse>> homePageMovieList = new ArrayList<>();
 
-        genres.forEach(genre ->{
-            if(genre.equals("voteCount")){
+        genres.forEach(genre -> {
+            if (genre.equals("voteCount")) {
                 List<Movie> movies = movieRepository.findTop10ByOrderByVoteCountDesc();
                 homePageMovieList.add(movieMapper.toListMovieResponse(movies));
-            }else {
+            } else {
                 List<Movie> movies = movieRepository.findTop10ByGenres_NameOrderByIdDesc(genre);
                 homePageMovieList.add(movieMapper.toListMovieResponse(movies));
             }
         });
-            return homePageMovieList;
+        return homePageMovieList;
     }
 
-    public List<MovieResponse> searchMovies(String keyword){
+    public List<MovieResponse> searchMovies(String keyword) {
         List<Movie> movies = movieRepository.searchMovies(keyword);
         return movieMapper.toListMovieResponse(movies);
     }
 
-    public Page<MovieResponse> getMovieForPage(int page, int size){
-        Pageable pageable = PageRequest.of(page,size);
+    public Page<MovieResponse> getMovieForPage(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         Page<Movie> pageMovie = movieRepository.findAll(pageable);
         return pageMovie.map(movieMapper::toMovieResponse);
     }
 
-    public List<MovieResponse> getFavoriteMovie(String userId){
+    public List<MovieResponse> getFavoriteMovie(String userId) {
         List<Movie> favoriteMovies = movieRepository.findFavoriteMoviesByUserId(userId);
         return movieMapper.toListMovieResponse(favoriteMovies);
     }
-    public boolean isLiked(String userId,Long movieId){
 
-        return userRepository.existsByIdAndFavoriteMovies_Id(userId,movieId);
+    public boolean isLiked(String userId, Long movieId) {
+
+        return userRepository.existsByIdAndFavoriteMovies_Id(userId, movieId);
     }
 
-    //For Admin
+    // For Admin
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<MovieResponse> getAllMoviesForAdmin(int page,int size, String search) {
+    public Page<MovieResponse> getAllMoviesForAdmin(int page, int size, String search) {
         Page<Movie> movies;
         Pageable pageable = PageRequest.of(page, size);
         if (search != null && !search.isEmpty()) {
@@ -109,10 +111,11 @@ public class MovieService {
 
         return movieMapper.toMovieResponse(movieRepository.save(movie));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public MovieResponse updateMovie(Long movieId, UpdateMovieRequest request) {
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+        Movie movie =
+                movieRepository.findById(movieId).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
 
         movieMapper.updateMovie(movie, request);
 
@@ -128,13 +131,12 @@ public class MovieService {
 
         return movieMapper.toMovieResponse(movieRepository.save(movie));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteMovieById(Long id){
-        if(!movieRepository.existsById(id)) {
+    public void deleteMovieById(Long id) {
+        if (!movieRepository.existsById(id)) {
             throw new AppException(ErrorCode.MOVIE_NOT_EXISTED);
         }
         movieRepository.deleteById(id);
     }
-
-
 }

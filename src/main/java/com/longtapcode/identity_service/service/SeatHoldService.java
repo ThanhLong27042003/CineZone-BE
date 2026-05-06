@@ -1,25 +1,23 @@
 package com.longtapcode.identity_service.service;
 
-import com.longtapcode.identity_service.constant.SeatInstanceStatus;
-import com.longtapcode.identity_service.dto.request.SeatHoldRequest;
-import com.longtapcode.identity_service.dto.response.SeatResponse;
-import com.longtapcode.identity_service.dto.response.SeatUpdateResponse;
-import com.longtapcode.identity_service.dto.response.SeatUpdateSuccess;
-import com.longtapcode.identity_service.repository.BookingDetailRepository;
-import com.longtapcode.identity_service.repository.BookingRepository;
-import com.longtapcode.identity_service.repository.ShowRepository;
-import com.longtapcode.identity_service.repository.UserRepository;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import com.longtapcode.identity_service.constant.SeatInstanceStatus;
+import com.longtapcode.identity_service.dto.request.SeatHoldRequest;
+import com.longtapcode.identity_service.dto.response.SeatResponse;
+import com.longtapcode.identity_service.dto.response.SeatUpdateResponse;
+import com.longtapcode.identity_service.dto.response.SeatUpdateSuccess;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
@@ -33,39 +31,36 @@ public class SeatHoldService {
     // ==================== LUA SCRIPT ĐỂ HOLD GHẾ ====================
     private final DefaultRedisScript<Long> holdSeatScript = new DefaultRedisScript<>(
             """
-            local key = KEYS[1]
-            local user = ARGV[1]
-            local ttl = tonumber(ARGV[2])
+			local key = KEYS[1]
+			local user = ARGV[1]
+			local ttl = tonumber(ARGV[2])
 
-            if redis.call("exists", key) == 0 then
-                redis.call("set", key, user)
-                redis.call("expire", key, ttl)
-                return 1
-            else
-                return 0
-            end
-            """, Long.class
-    );
+			if redis.call("exists", key) == 0 then
+				redis.call("set", key, user)
+				redis.call("expire", key, ttl)
+				return 1
+			else
+				return 0
+			end
+			""",
+            Long.class);
+
     @PreAuthorize("#request.userId == authentication.principal.claims['userId']")
     public SeatUpdateSuccess holdSeat(SeatHoldRequest request) {
         Long showId = request.getShowId();
         String seatNumber = request.getSeatNumber();
         String userId = request.getUserId();
 
-        if (isBooked(showId,seatNumber )) {
+        if (isBooked(showId, seatNumber)) {
             return SeatUpdateSuccess.builder()
                     .success(false)
                     .message("Ghế đã được đặt!")
                     .build();
         }
         String key = "hold:" + showId + ":" + seatNumber;
-        Long result = redisTemplate.execute(
-                holdSeatScript,
-                Collections.singletonList(key),
-                userId, "120"
-        );
-        if(result != null){
-            if(result == 1){
+        Long result = redisTemplate.execute(holdSeatScript, Collections.singletonList(key), userId, "120");
+        if (result != null) {
+            if (result == 1) {
                 Long ttl = getSeatTTL(showId, seatNumber);
                 long expiresAt = System.currentTimeMillis() + (ttl != null ? ttl * 1000 : 0);
                 SeatResponse seatResponse = seatService.getSeatBySeatNumber(seatNumber);
@@ -78,26 +73,20 @@ public class SeatHoldService {
                         .expiresAt(expiresAt)
                         .build();
 
-                messagingTemplate.convertAndSend(
-                        "/topic/show/" + request.getShowId(),
-                        message
-                );
+                messagingTemplate.convertAndSend("/topic/show/" + request.getShowId(), message);
 
                 return SeatUpdateSuccess.builder()
                         .success(true)
                         .message("Giữ ghế thành công!")
                         .build();
-            }else{
+            } else {
                 return SeatUpdateSuccess.builder()
                         .success(false)
                         .message("Ghế đã bị giữ!")
                         .build();
             }
         }
-        return  SeatUpdateSuccess.builder()
-                .success(false)
-                .message("Lỗi giữ ghế")
-                .build();
+        return SeatUpdateSuccess.builder().success(false).message("Lỗi giữ ghế").build();
     }
 
     public boolean isBooked(Long showId, String seatNumber) {
@@ -126,28 +115,22 @@ public class SeatHoldService {
                     .expiresAt(0L)
                     .build();
 
-            messagingTemplate.convertAndSend(
-                    "/topic/show/" + request.getShowId(),
-                    message
-            );
+            messagingTemplate.convertAndSend("/topic/show/" + request.getShowId(), message);
             return SeatUpdateSuccess.builder()
                     .success(true)
                     .message("Bỏ ghế thành công!")
                     .build();
         }
-        return SeatUpdateSuccess.builder()
-                .success(false)
-                .message("Lỗi bỏ ghế")
-                .build();
+        return SeatUpdateSuccess.builder().success(false).message("Lỗi bỏ ghế").build();
     }
 
     public List<SeatUpdateResponse> getOccupiedSeats(Long showId) {
         Set<String> holdKeys = redisTemplate.keys("hold:" + showId + ":*");
         Set<String> bookedKeys = redisTemplate.keys("booked:" + showId + ":*");
-        List<SeatUpdateResponse> seatUpdateResponses = new ArrayList<>() ;
+        List<SeatUpdateResponse> seatUpdateResponses = new ArrayList<>();
         if (holdKeys != null) {
-            holdKeys.forEach(key->{
-                Long ttl = redisTemplate.getExpire(key,TimeUnit.SECONDS);
+            holdKeys.forEach(key -> {
+                Long ttl = redisTemplate.getExpire(key, TimeUnit.SECONDS);
                 String userId = redisTemplate.opsForValue().get(key);
                 String seatNumber = key.split(":")[2];
                 SeatResponse seatResponse = seatService.getSeatBySeatNumber(seatNumber);
@@ -157,13 +140,13 @@ public class SeatHoldService {
                         .seatNumber(seatNumber)
                         .seatType(seatResponse.getVip())
                         .status(SeatInstanceStatus.HELD.getStatus())
-                        .expiresAt(System.currentTimeMillis() + (ttl != null ? ttl * 1000 : 0 ))
+                        .expiresAt(System.currentTimeMillis() + (ttl != null ? ttl * 1000 : 0))
                         .build());
             });
         }
 
         if (bookedKeys != null) {
-            bookedKeys.forEach(key-> {
+            bookedKeys.forEach(key -> {
                 String userId = redisTemplate.opsForValue().get(key);
                 seatUpdateResponses.add(SeatUpdateResponse.builder()
                         .showId(showId)
@@ -173,7 +156,6 @@ public class SeatHoldService {
                         .expiresAt(0L)
                         .build());
             });
-
         }
 
         return seatUpdateResponses;

@@ -1,19 +1,16 @@
 package com.longtapcode.identity_service.dto.request.admin;
 
-import com.longtapcode.identity_service.entity.Cast;
-import com.longtapcode.identity_service.entity.Genre;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.time.LocalDate;
 import java.util.Set;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
 public class UpdateMovieRequest {
     String title;
     String overview;

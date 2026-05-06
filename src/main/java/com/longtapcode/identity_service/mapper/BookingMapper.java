@@ -1,14 +1,14 @@
 package com.longtapcode.identity_service.mapper;
 
+import java.util.Set;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import com.longtapcode.identity_service.dto.response.BookingDetailResponse;
 import com.longtapcode.identity_service.dto.response.BookingResponse;
 import com.longtapcode.identity_service.entity.Booking;
 import com.longtapcode.identity_service.entity.BookingDetail;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface BookingMapper {

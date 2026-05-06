@@ -1,10 +1,11 @@
 package com.longtapcode.identity_service.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Getter
@@ -22,5 +23,4 @@ public class VNPayConfig {
 
     @Value("${vnpay.secret-key}")
     String secretKey;
-
 }

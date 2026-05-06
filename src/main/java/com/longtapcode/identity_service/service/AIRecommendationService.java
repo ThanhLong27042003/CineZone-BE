@@ -1,21 +1,23 @@
 package com.longtapcode.identity_service.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.longtapcode.identity_service.entity.Movie;
-import com.longtapcode.identity_service.repository.CastRepository;
-import com.longtapcode.identity_service.repository.GenreRepository;
-import com.longtapcode.identity_service.repository.MovieRepository;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.longtapcode.identity_service.entity.Movie;
+import com.longtapcode.identity_service.repository.CastRepository;
+import com.longtapcode.identity_service.repository.GenreRepository;
+import com.longtapcode.identity_service.repository.MovieRepository;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +37,8 @@ public class AIRecommendationService {
     /**
      * Get AI-powered recommendations using BERT and content-based filtering
      */
-    public List<Movie> getAIRecommendations(Long movieId, int limit, boolean useCollaborative, List<Integer> userHistory) {
+    public List<Movie> getAIRecommendations(
+            Long movieId, int limit, boolean useCollaborative, List<Integer> userHistory) {
         try {
             log.info("🤖 Calling AI service for movie recommendations: movieId={}, limit={}", movieId, limit);
 
@@ -63,12 +66,7 @@ public class AIRecommendationService {
 
             // Call AI service
             String url = aiServiceUrl + "/recommendations";
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    entity,
-                    Map.class
-            );
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 Map<String, Object> responseBody = response.getBody();
@@ -79,14 +77,19 @@ public class AIRecommendationService {
                 String algorithm = (String) responseBody.get("algorithm");
                 Double processingTime = ((Number) responseBody.get("processingTime")).doubleValue();
 
-                log.info("✅ AI recommendations received: count={}, algorithm={}, time={:.2f}s",
-                        recommendations.size(), algorithm, processingTime);
+                log.info(
+                        "✅ AI recommendations received: count={}, algorithm={}, time={:.2f}s",
+                        recommendations.size(),
+                        algorithm,
+                        processingTime);
 
                 // Convert to Movie entities
                 return recommendations.stream()
                         .map(rec -> {
                             Integer recMovieId = (Integer) rec.get("movieId");
-                            return movieRepository.findById(recMovieId.longValue()).orElse(null);
+                            return movieRepository
+                                    .findById(recMovieId.longValue())
+                                    .orElse(null);
                         })
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
@@ -114,9 +117,13 @@ public class AIRecommendationService {
             movieData.put("id", movie.getId());
             movieData.put("title", movie.getTitle());
             movieData.put("overview", movie.getOverview() != null ? movie.getOverview() : "");
-            movieData.put("releaseDate", movie.getReleaseDate() != null ? movie.getReleaseDate().toString() : null);
+            movieData.put(
+                    "releaseDate",
+                    movie.getReleaseDate() != null ? movie.getReleaseDate().toString() : null);
             movieData.put("runtime", movie.getRuntime());
-            movieData.put("voteAverage", movie.getVoteAverage() != null ? movie.getVoteAverage().doubleValue() : null);
+            movieData.put(
+                    "voteAverage",
+                    movie.getVoteAverage() != null ? movie.getVoteAverage().doubleValue() : null);
             movieData.put("voteCount", movie.getVoteCount());
 
             // Get genre IDs
@@ -156,9 +163,7 @@ public class AIRecommendationService {
 
         Optional<Movie> currentMovieOpt = movieRepository.findById(movieId);
         if (currentMovieOpt.isEmpty()) {
-            return movieRepository.findAll().stream()
-                    .limit(limit)
-                    .collect(Collectors.toList());
+            return movieRepository.findAll().stream().limit(limit).collect(Collectors.toList());
         }
 
         Movie currentMovie = currentMovieOpt.get();
@@ -218,15 +223,15 @@ public class AIRecommendationService {
 
         // Rating similarity (20% weight)
         if (movie1.getVoteAverage() != null && movie2.getVoteAverage() != null) {
-            double ratingDiff = Math.abs(movie1.getVoteAverage().doubleValue() -
-                    movie2.getVoteAverage().doubleValue());
+            double ratingDiff = Math.abs(movie1.getVoteAverage().doubleValue()
+                    - movie2.getVoteAverage().doubleValue());
             score += (1 - ratingDiff / 10.0) * 0.2;
         }
 
         // Release date similarity (10% weight)
         if (movie1.getReleaseDate() != null && movie2.getReleaseDate() != null) {
-            long daysDiff = Math.abs(movie1.getReleaseDate().toEpochDay() -
-                    movie2.getReleaseDate().toEpochDay());
+            long daysDiff = Math.abs(movie1.getReleaseDate().toEpochDay()
+                    - movie2.getReleaseDate().toEpochDay());
             double yearsDiff = daysDiff / 365.0;
             score += Math.max(0, (1 - yearsDiff / 10.0)) * 0.1;
         }
@@ -247,6 +252,4 @@ public class AIRecommendationService {
     public List<Movie> getRecommendationsWithHistory(Long movieId, int limit, List<Integer> userHistory) {
         return getAIRecommendations(movieId, limit, true, userHistory);
     }
-
-
 }

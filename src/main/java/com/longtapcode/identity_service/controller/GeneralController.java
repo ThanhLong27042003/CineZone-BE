@@ -1,5 +1,12 @@
 package com.longtapcode.identity_service.controller;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.longtapcode.identity_service.dto.request.ApiResponse;
 import com.longtapcode.identity_service.dto.response.CastResponse;
@@ -10,23 +17,17 @@ import com.longtapcode.identity_service.service.AIRecommendationService;
 import com.longtapcode.identity_service.service.CastService;
 import com.longtapcode.identity_service.service.MovieService;
 import com.longtapcode.identity_service.service.StatsService;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/general")
 @AllArgsConstructor
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE ,makeFinal= true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GeneralController {
     MovieService movieService;
     CastService castService;
@@ -35,10 +36,10 @@ public class GeneralController {
     MovieMapper movieMapper;
 
     @GetMapping("search/{keyword}")
-    public ApiResponse<?> search(@PathVariable String keyword){
+    public ApiResponse<?> search(@PathVariable String keyword) {
         List<MovieResponse> movieResponse = movieService.searchMovies(keyword);
         List<CastResponse> castResponse = castService.searchCasts(keyword);
-        if(!movieResponse.isEmpty()){
+        if (!movieResponse.isEmpty()) {
             return ApiResponse.<List<MovieResponse>>builder()
                     .result(movieResponse)
                     .build();
@@ -46,7 +47,7 @@ public class GeneralController {
             return ApiResponse.<List<CastResponse>>builder()
                     .result(castResponse)
                     .build();
-        }else{
+        } else {
             return ApiResponse.<String>builder()
                     .result("Không tìm thấy kết quả nào!!!")
                     .build();
@@ -60,7 +61,6 @@ public class GeneralController {
                 .build();
     }
 
-
     @GetMapping("/cinema")
     public ApiResponse<Map<String, Object>> getCinemaStats() {
         return ApiResponse.<Map<String, Object>>builder()
@@ -73,9 +73,7 @@ public class GeneralController {
      */
     @GetMapping("/trending")
     public ApiResponse<Object> getTrendingMovies() {
-        return ApiResponse.builder()
-                .result(statsService.getTrendingMovies())
-                .build();
+        return ApiResponse.builder().result(statsService.getTrendingMovies()).build();
     }
 
     /**
@@ -83,9 +81,7 @@ public class GeneralController {
      */
     @GetMapping("/coming-soon")
     public ApiResponse<Object> getComingSoonMovies() {
-        return ApiResponse.builder()
-                .result(statsService.getComingSoonMovies())
-                .build();
+        return ApiResponse.builder().result(statsService.getComingSoonMovies()).build();
     }
 
     /**
@@ -107,8 +103,6 @@ public class GeneralController {
 
         List<MovieResponse> response = movieMapper.toListMovieResponse(recommendations);
 
-        return ApiResponse.<List<MovieResponse>>builder()
-                .result(response)
-                .build();
+        return ApiResponse.<List<MovieResponse>>builder().result(response).build();
     }
 }

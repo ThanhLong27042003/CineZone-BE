@@ -1,13 +1,14 @@
 package com.longtapcode.identity_service.dto.response;
 
-import com.longtapcode.identity_service.entity.Cast;
-import com.longtapcode.identity_service.entity.Genre;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
+
+import com.longtapcode.identity_service.entity.Cast;
+import com.longtapcode.identity_service.entity.Genre;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder

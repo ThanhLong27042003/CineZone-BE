@@ -1,5 +1,17 @@
 package com.longtapcode.identity_service.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.longtapcode.identity_service.constant.SeatInstanceStatus;
 import com.longtapcode.identity_service.dto.response.PaymentCreateResponse;
 import com.longtapcode.identity_service.entity.Booking;
@@ -8,21 +20,11 @@ import com.longtapcode.identity_service.exception.AppException;
 import com.longtapcode.identity_service.exception.ErrorCode;
 import com.longtapcode.identity_service.repository.BookingDetailRepository;
 import com.longtapcode.identity_service.repository.BookingRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -40,8 +42,8 @@ public class BookingCancellationService {
     @Transactional
     public Map<String, Object> cancelBookingWithRefund(Long bookingId) {
         // 1. Validate booking
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        Booking booking =
+                bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
         // Check status
         if (!"CONFIRMED".equals(booking.getStatus())) {
@@ -80,11 +82,14 @@ public class BookingCancellationService {
             log.info("Booking {} cancelled successfully with refund", bookingId);
 
             return Map.of(
-                    "success", true,
-                    "message", "Booking cancelled and refund processed",
-                    "refundId", refundResult.get("refundId"),
-                    "refundAmount", refundResult.get("amount")
-            );
+                    "success",
+                    true,
+                    "message",
+                    "Booking cancelled and refund processed",
+                    "refundId",
+                    refundResult.get("refundId"),
+                    "refundAmount",
+                    refundResult.get("amount"));
 
         } catch (Exception e) {
             log.error("Failed to cancel booking with refund: {}", bookingId, e);
@@ -109,22 +114,19 @@ public class BookingCancellationService {
         // Note: VNPay might not support automatic refunds via API
         // You may need manual refund process
 
-        log.warn("VNPay refund not implemented - Manual refund required for booking: {}",
-                booking.getId());
+        log.warn("VNPay refund not implemented - Manual refund required for booking: {}", booking.getId());
 
         return Map.of(
                 "refundId", "MANUAL_VNPAY",
                 "amount", booking.getTotalPrice(),
-                "message", "VNPay refund requires manual processing"
-        );
+                "message", "VNPay refund requires manual processing");
     }
 
     private void releaseBookedSeats(Booking booking) {
         Long showId = booking.getShowID().getId();
 
         // Get all booking details
-        List<BookingDetail> details = bookingDetailRepository.findAll()
-                .stream()
+        List<BookingDetail> details = bookingDetailRepository.findAll().stream()
                 .filter(d -> d.getBookingID().getId().equals(booking.getId()))
                 .toList();
 

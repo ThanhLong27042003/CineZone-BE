@@ -1,31 +1,31 @@
-//package com.longtapcode.identity_service.controller.admin;
+// package com.longtapcode.identity_service.controller.admin;
 //
-//import com.longtapcode.identity_service.dto.request.ApiResponse;
-//import com.longtapcode.identity_service.dto.response.*;
-//import com.longtapcode.identity_service.service.BookingService;
-//import lombok.AccessLevel;
-//import lombok.RequiredArgsConstructor;
-//import lombok.experimental.FieldDefaults;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.data.domain.Sort;
-//import org.springframework.format.annotation.DateTimeFormat;
-//import org.springframework.security.access.prepost.PreAuthorize;
-//import org.springframework.web.bind.annotation.*;
+// import com.longtapcode.identity_service.dto.request.ApiResponse;
+// import com.longtapcode.identity_service.dto.response.*;
+// import com.longtapcode.identity_service.service.BookingService;
+// import lombok.AccessLevel;
+// import lombok.RequiredArgsConstructor;
+// import lombok.experimental.FieldDefaults;
+// import org.springframework.data.domain.Page;
+// import org.springframework.data.domain.PageRequest;
+// import org.springframework.data.domain.Pageable;
+// import org.springframework.data.domain.Sort;
+// import org.springframework.format.annotation.DateTimeFormat;
+// import org.springframework.security.access.prepost.PreAuthorize;
+// import org.springframework.web.bind.annotation.*;
 //
-//import java.time.LocalDate;
-//import java.time.LocalDateTime;
-//import java.time.LocalTime;
-//import java.util.List;
-//import java.util.stream.Collectors;
+// import java.time.LocalDate;
+// import java.time.LocalDateTime;
+// import java.time.LocalTime;
+// import java.util.List;
+// import java.util.stream.Collectors;
 //
-//@RestController
-//@RequestMapping("/admin/bookings")
-//@RequiredArgsConstructor
-//@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-////@PreAuthorize("hasRole('ADMIN')")
-//public class AdminBookingController {
+// @RestController
+// @RequestMapping("/admin/bookings")
+// @RequiredArgsConstructor
+// @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+//// @PreAuthorize("hasRole('ADMIN')")
+// public class AdminBookingController {
 //    BookingService bookingService;
 //
 //    @GetMapping("/getAllBookings/{page}/{size}")
@@ -146,22 +146,9 @@
 //                .result(result)
 //                .build();
 //    }
-//}
+// }
 
 package com.longtapcode.identity_service.controller.admin;
-
-import com.longtapcode.identity_service.dto.request.ApiResponse;
-import com.longtapcode.identity_service.dto.response.*;
-import com.longtapcode.identity_service.service.BookingService;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -169,11 +156,26 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.*;
+
+import com.longtapcode.identity_service.dto.request.ApiResponse;
+import com.longtapcode.identity_service.dto.response.*;
+import com.longtapcode.identity_service.service.BookingService;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
 @RestController
 @RequestMapping("/admin/bookings")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-//@PreAuthorize("hasRole('ADMIN')")
+// @PreAuthorize("hasRole('ADMIN')")
 public class AdminBookingController {
     BookingService bookingService;
 
@@ -192,12 +194,10 @@ public class AdminBookingController {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingDate"));
 
-        Page<BookingResponse> bookings = bookingService.getAllBookingsForAdmin(
-                pageable, userName, showId, status, fromDateTime, toDateTime);
+        Page<BookingResponse> bookings =
+                bookingService.getAllBookingsForAdmin(pageable, userName, showId, status, fromDateTime, toDateTime);
 
-        return ApiResponse.<Page<BookingResponse>>builder()
-                .result(bookings)
-                .build();
+        return ApiResponse.<Page<BookingResponse>>builder().result(bookings).build();
     }
 
     @GetMapping("/{bookingId}")
@@ -228,7 +228,8 @@ public class AdminBookingController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
 
-        LocalDateTime fromDateTime = fromDate != null ? fromDate.atStartOfDay() : LocalDateTime.now().minusDays(30);
+        LocalDateTime fromDateTime =
+                fromDate != null ? fromDate.atStartOfDay() : LocalDateTime.now().minusDays(30);
         LocalDateTime toDateTime = toDate != null ? toDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
         return ApiResponse.<BookingStatisticsResponse>builder()
@@ -241,36 +242,36 @@ public class AdminBookingController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
 
-        LocalDateTime fromDateTime = fromDate != null ? fromDate.atStartOfDay() : LocalDateTime.now().minusDays(30);
+        LocalDateTime fromDateTime =
+                fromDate != null ? fromDate.atStartOfDay() : LocalDateTime.now().minusDays(30);
         LocalDateTime toDateTime = toDate != null ? toDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
         List<Object[]> data = bookingService.getRevenueByDate(fromDateTime, toDateTime);
 
-        List<RevenueByDateResponse> result = data.stream().map(row -> {
+        List<RevenueByDateResponse> result = data.stream()
+                .map(row -> {
 
-            // Convert date
-            LocalDate date;
-            Object dateObj = row[0];
+                    // Convert date
+                    LocalDate date;
+                    Object dateObj = row[0];
 
-            if (dateObj instanceof java.sql.Date) {
-                date = ((java.sql.Date) dateObj).toLocalDate();
-            } else if (dateObj instanceof java.time.LocalDate) {
-                date = (LocalDate) dateObj;
-            } else {
-                throw new IllegalStateException("Unexpected date type: " + dateObj.getClass());
-            }
+                    if (dateObj instanceof java.sql.Date) {
+                        date = ((java.sql.Date) dateObj).toLocalDate();
+                    } else if (dateObj instanceof java.time.LocalDate) {
+                        date = (LocalDate) dateObj;
+                    } else {
+                        throw new IllegalStateException("Unexpected date type: " + dateObj.getClass());
+                    }
 
-            return RevenueByDateResponse.builder()
-                    .date(date)
-                    .revenue(((Number) row[1]).longValue())
-                    .build();
-        }).collect(Collectors.toList());
+                    return RevenueByDateResponse.builder()
+                            .date(date)
+                            .revenue(((Number) row[1]).longValue())
+                            .build();
+                })
+                .collect(Collectors.toList());
 
-        return ApiResponse.<List<RevenueByDateResponse>>builder()
-                .result(result)
-                .build();
+        return ApiResponse.<List<RevenueByDateResponse>>builder().result(result).build();
     }
-
 
     @GetMapping("/top-movies")
     public ApiResponse<List<TopMovieResponse>> getTopMovies(
@@ -278,7 +279,8 @@ public class AdminBookingController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             @RequestParam(defaultValue = "10") int limit) {
 
-        LocalDateTime fromDateTime = fromDate != null ? fromDate.atStartOfDay() : LocalDateTime.now().minusDays(30);
+        LocalDateTime fromDateTime =
+                fromDate != null ? fromDate.atStartOfDay() : LocalDateTime.now().minusDays(30);
         LocalDateTime toDateTime = toDate != null ? toDate.atTime(LocalTime.MAX) : LocalDateTime.now();
 
         List<Object[]> data = bookingService.getTopMovies(fromDateTime, toDateTime, limit);
@@ -291,8 +293,6 @@ public class AdminBookingController {
                         .build())
                 .collect(Collectors.toList());
 
-        return ApiResponse.<List<TopMovieResponse>>builder()
-                .result(result)
-                .build();
+        return ApiResponse.<List<TopMovieResponse>>builder().result(result).build();
     }
 }

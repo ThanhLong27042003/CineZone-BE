@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 public class UpdateUserRequest {
     @Size(min = 3, message = "INVALID_USERNAME")
     String userName;
+
     String firstName;
     String lastName;
     String phoneNumber;

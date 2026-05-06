@@ -1,5 +1,15 @@
 package com.longtapcode.identity_service.service;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+
 import com.longtapcode.identity_service.configuration.PayPalConfig;
 import com.longtapcode.identity_service.constant.SeatInstanceStatus;
 import com.longtapcode.identity_service.dto.request.PaymentCreateRequest;
@@ -11,19 +21,11 @@ import com.longtapcode.identity_service.repository.ShowRepository;
 import com.paypal.core.PayPalHttpClient;
 import com.paypal.http.HttpResponse;
 import com.paypal.orders.*;
-import com.paypal.payments.RefundRequest;
 import com.paypal.payments.CapturesRefundRequest;
+import com.paypal.payments.RefundRequest;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -36,12 +38,12 @@ public class PayPalService {
     private final RedisTemplate<String, String> redisTemplate;
     private final SimpMessagingTemplate messagingTemplate;
 
-
     public PaymentCreateResponse createPayPalOrder(PaymentCreateRequest request, String orderId) {
         log.info("Creating PayPal order for showId: {}, user: {}", request.getShowId(), request.getUserId());
 
         // 1. Get show info
-        Show show = showRepository.findById(request.getShowId())
+        Show show = showRepository
+                .findById(request.getShowId())
                 .orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
 
         // 2. Calculate amount
@@ -52,7 +54,8 @@ public class PayPalService {
         String totalAmountStr = totalAmount.setScale(2, RoundingMode.HALF_UP).toString();
 
         // ✅ Convert to cents/integer for storage (avoid decimal parsing issues)
-        Long totalAmountCents = totalAmount.multiply(BigDecimal.valueOf(100))
+        Long totalAmountCents = totalAmount
+                .multiply(BigDecimal.valueOf(100))
                 .setScale(0, RoundingMode.HALF_UP)
                 .longValue();
 
@@ -82,11 +85,9 @@ public class PayPalService {
                 .softDescriptor("CINEMA TICKET")
                 .amountWithBreakdown(new AmountWithBreakdown()
                         .currencyCode("USD")
-                        .value(totalAmountStr)  // ✅ Use string format for PayPal API
+                        .value(totalAmountStr) // ✅ Use string format for PayPal API
                         .amountBreakdown(new AmountBreakdown()
-                                .itemTotal(new Money().currencyCode("USD").value(totalAmountStr))
-                        )
-                );
+                                .itemTotal(new Money().currencyCode("USD").value(totalAmountStr))));
 
         purchaseUnits.add(purchaseUnit);
         orderRequest.purchaseUnits(purchaseUnits);
@@ -103,12 +104,7 @@ public class PayPalService {
 
             // 6. Lưu metadata vào Redis
             String paymentSessionKey = "payment_session:" + order.id();
-            redisTemplate.opsForValue().set(
-                    paymentSessionKey,
-                    "PENDING",
-                    30,
-                    TimeUnit.MINUTES
-            );
+            redisTemplate.opsForValue().set(paymentSessionKey, "PENDING", 30, TimeUnit.MINUTES);
             String metadataKey = "paypal_metadata:" + order.id();
             Map<String, String> metadata = new HashMap<>();
             metadata.put("orderId", orderId);
@@ -145,7 +141,6 @@ public class PayPalService {
             throw new RuntimeException("PayPal order creation failed", e);
         }
     }
-
 
     public Map<String, Object> capturePayPalOrder(String paypalOrderId) {
         log.info("Capturing PayPal order: {}", paypalOrderId);
@@ -195,7 +190,8 @@ public class PayPalService {
             } catch (NumberFormatException e) {
                 log.warn("Amount in metadata is decimal format: {}, converting...", amountStr);
                 BigDecimal decimalAmount = new BigDecimal(amountStr);
-                amountCents = decimalAmount.multiply(BigDecimal.valueOf(100))
+                amountCents = decimalAmount
+                        .multiply(BigDecimal.valueOf(100))
                         .setScale(0, RoundingMode.HALF_UP)
                         .longValue();
                 log.info("Converted decimal to cents: {} -> {} cents", amountStr, amountCents);
@@ -212,7 +208,8 @@ public class PayPalService {
             result.put("paymentMethod", "PAYPAL");
 
             try {
-                String transactionId = order.purchaseUnits().get(0)
+                String transactionId = order.purchaseUnits()
+                        .get(0)
                         .payments()
                         .captures()
                         .get(0)
@@ -258,8 +255,7 @@ public class PayPalService {
             HttpResponse<com.paypal.payments.Refund> response = payPalHttpClient.execute(capturesRefundRequest);
             com.paypal.payments.Refund refund = response.result();
 
-            log.info("PayPal refund successful - Refund ID: {}, Status: {}",
-                    refund.id(), refund.status());
+            log.info("PayPal refund successful - Refund ID: {}, Status: {}", refund.id(), refund.status());
 
             Map<String, Object> result = new HashMap<>();
             result.put("success", "COMPLETED".equals(refund.status()));

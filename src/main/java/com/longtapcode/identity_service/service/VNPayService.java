@@ -1,5 +1,15 @@
 package com.longtapcode.identity_service.service;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+
+import com.longtapcode.identity_service.Util.VNPayUtil;
 import com.longtapcode.identity_service.configuration.VNPayConfig;
 import com.longtapcode.identity_service.constant.VNPayConstant;
 import com.longtapcode.identity_service.dto.request.PaymentCreateRequest;
@@ -8,16 +18,9 @@ import com.longtapcode.identity_service.entity.Show;
 import com.longtapcode.identity_service.exception.AppException;
 import com.longtapcode.identity_service.exception.ErrorCode;
 import com.longtapcode.identity_service.repository.ShowRepository;
-import com.longtapcode.identity_service.Util.VNPayUtil;
-import jakarta.servlet.http.HttpServletRequest;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +35,8 @@ public class VNPayService {
      * Tạo VNPay payment URL
      */
     public PaymentCreateResponse createVNPayPayment(PaymentCreateRequest request, HttpServletRequest httpRequest) {
-        Show show = showRepository.findById(request.getShowId())
+        Show show = showRepository
+                .findById(request.getShowId())
                 .orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
 
         // Calculate amount

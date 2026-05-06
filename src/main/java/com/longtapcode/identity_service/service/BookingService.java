@@ -1,34 +1,34 @@
 //
-//package com.longtapcode.identity_service.service;
+// package com.longtapcode.identity_service.service;
 //
-//import com.longtapcode.identity_service.dto.response.BookingResponse;
-//import com.longtapcode.identity_service.dto.response.BookingStatisticsResponse;
-//import com.longtapcode.identity_service.entity.Booking;
-//import com.longtapcode.identity_service.exception.AppException;
-//import com.longtapcode.identity_service.exception.ErrorCode;
-//import com.longtapcode.identity_service.mapper.BookingMapper;
-//import com.longtapcode.identity_service.repository.BookingRepository;
-//import lombok.AccessLevel;
-//import lombok.RequiredArgsConstructor;
-//import lombok.experimental.FieldDefaults;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.security.access.prepost.PreAuthorize;
-//import org.springframework.stereotype.Service;
-//import org.springframework.transaction.annotation.Transactional;
+// import com.longtapcode.identity_service.dto.response.BookingResponse;
+// import com.longtapcode.identity_service.dto.response.BookingStatisticsResponse;
+// import com.longtapcode.identity_service.entity.Booking;
+// import com.longtapcode.identity_service.exception.AppException;
+// import com.longtapcode.identity_service.exception.ErrorCode;
+// import com.longtapcode.identity_service.mapper.BookingMapper;
+// import com.longtapcode.identity_service.repository.BookingRepository;
+// import lombok.AccessLevel;
+// import lombok.RequiredArgsConstructor;
+// import lombok.experimental.FieldDefaults;
+// import lombok.extern.slf4j.Slf4j;
+// import org.springframework.data.domain.Page;
+// import org.springframework.data.domain.PageRequest;
+// import org.springframework.data.domain.Pageable;
+// import org.springframework.security.access.prepost.PreAuthorize;
+// import org.springframework.stereotype.Service;
+// import org.springframework.transaction.annotation.Transactional;
 //
-//import java.time.LocalDateTime;
-//import java.util.List;
-//import java.util.Map;
-//import java.util.stream.Collectors;
+// import java.time.LocalDateTime;
+// import java.util.List;
+// import java.util.Map;
+// import java.util.stream.Collectors;
 //
-//@Service
-//@RequiredArgsConstructor
-//@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-//@Slf4j
-//public class BookingService {
+// @Service
+// @RequiredArgsConstructor
+// @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+// @Slf4j
+// public class BookingService {
 //    BookingRepository bookingRepository;
 //    BookingMapper bookingMapper;
 //    @PreAuthorize("hasRole('ADMIN')")
@@ -163,11 +163,21 @@
 //    public Map<String, Object> cancelMyBookingWithRefund(Long bookingId) {
 //        return cancellationService.cancelBookingWithRefund(bookingId);
 //    }
-//}
-
-
+// }
 
 package com.longtapcode.identity_service.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.longtapcode.identity_service.dto.response.BookingResponse;
 import com.longtapcode.identity_service.dto.response.BookingStatisticsResponse;
@@ -176,21 +186,11 @@ import com.longtapcode.identity_service.exception.AppException;
 import com.longtapcode.identity_service.exception.ErrorCode;
 import com.longtapcode.identity_service.mapper.BookingMapper;
 import com.longtapcode.identity_service.repository.BookingRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -199,6 +199,7 @@ import java.util.stream.Collectors;
 public class BookingService {
     BookingRepository bookingRepository;
     BookingMapper bookingMapper;
+
     @PreAuthorize("hasRole('ADMIN')")
     public Page<BookingResponse> getAllBookingsForAdmin(
             Pageable pageable,
@@ -208,22 +209,24 @@ public class BookingService {
             LocalDateTime fromDate,
             LocalDateTime toDate) {
 
-        Page<Booking> bookings = bookingRepository.findAllWithFilters(
-                userName, showId, status, fromDate, toDate, pageable);
+        Page<Booking> bookings =
+                bookingRepository.findAllWithFilters(userName, showId, status, fromDate, toDate, pageable);
 
         return bookings.map(bookingMapper::toBookingResponse);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public BookingResponse getBookingById(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        Booking booking =
+                bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
         return bookingMapper.toBookingResponse(booking);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public BookingResponse cancelBookingByAdmin(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        Booking booking =
+                bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
         if ("CANCELLED".equals(booking.getStatus())) {
             throw new AppException(ErrorCode.BOOKING_ALREADY_CANCELLED);
@@ -235,11 +238,12 @@ public class BookingService {
 
         return bookingMapper.toBookingResponse(bookingRepository.save(booking));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public BookingResponse confirmBookingByAdmin(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        Booking booking =
+                bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
         if ("CONFIRMED".equals(booking.getStatus())) {
             throw new AppException(ErrorCode.BOOKING_ALREADY_CONFIRMED);
@@ -251,6 +255,7 @@ public class BookingService {
 
         return bookingMapper.toBookingResponse(bookingRepository.save(booking));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public BookingStatisticsResponse getBookingStatistics(LocalDateTime fromDate, LocalDateTime toDate) {
         Long totalBookings = bookingRepository.countByDateRange(fromDate, toDate);
@@ -281,22 +286,18 @@ public class BookingService {
      */
     public List<BookingResponse> getBookingsByUserId(String userId) {
 
-        List<Booking> bookings =
-                bookingRepository.findTop10ById1_IdOrderByBookingDateDesc(userId);
+        List<Booking> bookings = bookingRepository.findTop10ById1_IdOrderByBookingDateDesc(userId);
 
-        return bookings.stream()
-                .map(bookingMapper::toBookingResponse)
-                .collect(Collectors.toList());
+        return bookings.stream().map(bookingMapper::toBookingResponse).collect(Collectors.toList());
     }
-
 
     /**
      * Hủy booking bởi user (chỉ cho phép nếu chưa quá giờ chiếu)
      */
     @Transactional
     public BookingResponse cancelBookingByUser(Long bookingId, String userId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        Booking booking =
+                bookingRepository.findById(bookingId).orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
         // Check quyền sở hữu
         if (!booking.getId1().getId().equals(userId)) {

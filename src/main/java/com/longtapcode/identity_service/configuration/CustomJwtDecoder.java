@@ -9,7 +9,6 @@ import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Component;
 
-import com.longtapcode.identity_service.dto.request.VerifyRequest;
 import com.longtapcode.identity_service.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 
@@ -31,8 +30,7 @@ public class CustomJwtDecoder implements JwtDecoder {
     @Override
     public Jwt decode(String token) throws JwtException {
         try {
-            authenticationService.verifyToken(
-                    token, false);
+            authenticationService.verifyToken(token, false);
         } catch (JOSEException | ParseException e) {
             throw new JwtException(e.getMessage());
         }

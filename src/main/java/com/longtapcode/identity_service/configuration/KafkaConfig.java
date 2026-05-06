@@ -1,6 +1,8 @@
 package com.longtapcode.identity_service.configuration;
 
-import com.longtapcode.identity_service.dto.event.BookingConfirmedEvent;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -15,8 +17,7 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.longtapcode.identity_service.dto.event.BookingConfirmedEvent;
 
 @Configuration
 @EnableKafka
@@ -63,8 +64,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, BookingConfirmedEvent>
-    kafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, BookingConfirmedEvent> kafkaListenerContainerFactory() {
 
         ConcurrentKafkaListenerContainerFactory<String, BookingConfirmedEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();

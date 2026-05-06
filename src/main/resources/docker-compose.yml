@@ -2,6 +2,19 @@ version: '3.8'
 
 services:
   # Zookeeper - Required for Kafka
+  mysql:
+    image: mysql:8.0
+    container_name: mysqlCineZone
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: long27042003
+      MYSQL_DATABASE: cinezonedb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - kafka-network
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
@@ -62,6 +75,7 @@ services:
       - kafka-network
 
 volumes:
+  mysql_data:
   redis_data:
 
 networks:

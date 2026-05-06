@@ -1,20 +1,22 @@
 package com.longtapcode.identity_service.service;
 
-import com.longtapcode.identity_service.entity.Movie;
-import com.longtapcode.identity_service.entity.Show;
-import com.longtapcode.identity_service.repository.*;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import com.longtapcode.identity_service.entity.Movie;
+import com.longtapcode.identity_service.entity.Show;
+import com.longtapcode.identity_service.repository.*;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +35,8 @@ public class AIService {
     String aiServiceUrl;
 
     @PreAuthorize("hasRole('ADMIN')")
-    public Map<String, Object> analyzeRevenue(List<Map<String, Object>> bookings, LocalDateTime fromDate, LocalDateTime toDate) {
+    public Map<String, Object> analyzeRevenue(
+            List<Map<String, Object>> bookings, LocalDateTime fromDate, LocalDateTime toDate) {
         try {
             String url = aiServiceUrl + "/analyze-revenue";
 
@@ -47,12 +50,7 @@ public class AIService {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    entity,
-                    Map.class
-            );
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 return (Map<String, Object>) response.getBody().get("data");
@@ -72,8 +70,7 @@ public class AIService {
             List<Map<String, Object>> existingShows,
             List<Integer> rooms,
             Map<String, String> dateRange,
-            Map<String, Object> constraints
-    ) {
+            Map<String, Object> constraints) {
         try {
             String url = aiServiceUrl + "/optimize-schedule";
 
@@ -89,12 +86,7 @@ public class AIService {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    entity,
-                    Map.class
-            );
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 return (List<Map<String, Object>>) response.getBody().get("schedule");
@@ -118,12 +110,7 @@ public class AIService {
 
             HttpEntity<List<Map<String, Object>>> entity = new HttpEntity<>(historicalBookings, headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    entity,
-                    Map.class
-            );
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
             return response.getStatusCode() == HttpStatus.OK;
 
@@ -137,9 +124,7 @@ public class AIService {
     public Map predictDemand(int hour, int dayOfWeek, boolean isWeekend) {
         try {
             String url = String.format(
-                    "%s/predict-demand?hour=%d&day_of_week=%d&is_weekend=%b",
-                    aiServiceUrl, hour, dayOfWeek, isWeekend
-            );
+                    "%s/predict-demand?hour=%d&day_of_week=%d&is_weekend=%b", aiServiceUrl, hour, dayOfWeek, isWeekend);
 
             ResponseEntity<Map> response = restTemplate.postForEntity(url, null, Map.class);
 
@@ -167,23 +152,18 @@ public class AIService {
         }
     }
 
-
     private Map<String, Object> createFallbackAnalysis() {
         Map<String, Object> analysis = new HashMap<>();
-        analysis.put("insights", Arrays.asList(
-                "AI service temporarily unavailable",
-                "Using basic analytics"
-        ));
+        analysis.put("insights", Arrays.asList("AI service temporarily unavailable", "Using basic analytics"));
         analysis.put("patterns", Collections.emptyMap());
-        analysis.put("recommendations", List.of(
-                "Enable AI service for advanced insights"
-        ));
+        analysis.put("recommendations", List.of("Enable AI service for advanced insights"));
         return analysis;
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public List<Map<String, Object>> prepareBookingsData(LocalDateTime fromDate, LocalDateTime toDate) {
         List<Map<String, Object>> result = new ArrayList<>();
-        List<Object[]> rows = bookingRepository.getBookingDataForAI(fromDate,toDate);
+        List<Object[]> rows = bookingRepository.getBookingDataForAI(fromDate, toDate);
         for (Object[] r : rows) {
             Map<String, Object> map = new LinkedHashMap<>();
             Long movieId = (Long) r[3];
@@ -199,46 +179,48 @@ public class AIService {
             map.put("seatCount", r[7]);
             map.put("bookingDate", r[8].toString());
             map.put("status", r[9]);
-            map.put("genreIds",genreIds);
-            map.put("castIds",castIds);
+            map.put("genreIds", genreIds);
+            map.put("castIds", castIds);
             result.add(map);
         }
 
         return result;
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public List<Map<String, Object>> prepareMoviesData() {
-        List<Map<String,Object>> result = new ArrayList<>();
+        List<Map<String, Object>> result = new ArrayList<>();
         List<Movie> movies = movieRepository.findAll();
-        for(Movie movie : movies){
-            Map<String,Object> map = new HashMap<>();
+        for (Movie movie : movies) {
+            Map<String, Object> map = new HashMap<>();
             List<Long> castIds = castRepository.findCastIdsByMovie(movie.getId());
             List<Long> genreIds = genreRepository.findGenreIdsByMovie(movie.getId());
-            map.put("id",movie.getId());
-            map.put("title",movie.getTitle());
-            map.put("genreIds",genreIds);
-            map.put("castIds",castIds);
-            map.put("runtime",movie.getRuntime());
-            map.put("popularity",0);
-            map.put("voteAverage",movie.getVoteAverage());
+            map.put("id", movie.getId());
+            map.put("title", movie.getTitle());
+            map.put("genreIds", genreIds);
+            map.put("castIds", castIds);
+            map.put("runtime", movie.getRuntime());
+            map.put("popularity", 0);
+            map.put("voteAverage", movie.getVoteAverage());
             map.put("voteCount", movie.getVoteCount());
-            map.put("releaseDate",movie.getReleaseDate().toString());
+            map.put("releaseDate", movie.getReleaseDate().toString());
 
             result.add(map);
         }
         return result;
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public List<Map<String, Object>> prepareShowsData() {
-        List<Map<String,Object>> result = new ArrayList<>();
+        List<Map<String, Object>> result = new ArrayList<>();
         List<Show> shows = showRepository.findAll();
-        for(Show show : shows){
-            Map<String,Object> map = new HashMap<>();
-            map.put("showId",show.getId());
-            map.put("movieId",show.getMovieID().getId());
-            map.put("roomId",show.getRoomId().getRoomId());
-            map.put("showDateTime",show.getShowDateTime().toString());
-            map.put("price",show.getPrice());
+        for (Show show : shows) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("showId", show.getId());
+            map.put("movieId", show.getMovieID().getId());
+            map.put("roomId", show.getRoomId().getRoomId());
+            map.put("showDateTime", show.getShowDateTime().toString());
+            map.put("price", show.getPrice());
 
             result.add(map);
         }

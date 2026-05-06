@@ -5,13 +5,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import com.longtapcode.identity_service.dto.request.ChangePassWordRequest;
-import com.longtapcode.identity_service.dto.request.UpdateUserRequest;
-import com.longtapcode.identity_service.dto.response.UserResponse;
-import com.longtapcode.identity_service.mapper.UserMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,13 +18,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.longtapcode.identity_service.dto.request.AuthenticationRequest;
+import com.longtapcode.identity_service.dto.request.ChangePassWordRequest;
+import com.longtapcode.identity_service.dto.request.UpdateUserRequest;
 import com.longtapcode.identity_service.dto.response.AuthenticationResponse;
 import com.longtapcode.identity_service.dto.response.RefreshTokenResponse;
+import com.longtapcode.identity_service.dto.response.UserResponse;
 import com.longtapcode.identity_service.entity.RefreshToken;
 import com.longtapcode.identity_service.entity.Role;
 import com.longtapcode.identity_service.entity.User;
 import com.longtapcode.identity_service.exception.AppException;
 import com.longtapcode.identity_service.exception.ErrorCode;
+import com.longtapcode.identity_service.mapper.UserMapper;
 import com.longtapcode.identity_service.repository.RefreshTokenRepository;
 import com.longtapcode.identity_service.repository.UserRepository;
 import com.nimbusds.jose.*;
@@ -63,18 +64,18 @@ public class AuthenticationService {
     @Value("${jwt.refreshableDuration}")
     long refreshableDuration;
 
-    public AuthenticationResponse logIn(HttpServletResponse res,AuthenticationRequest request) {
+    public AuthenticationResponse logIn(HttpServletResponse res, AuthenticationRequest request) {
         User user = userRepository
                 .findByUserName(request.getUserName())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassWord(), user.getPassword());
         if (!authenticated) throw new AppException(ErrorCode.INCORRECT_PASSWORD);
-        if(user.isLock()) throw new AppException(ErrorCode.ACCOUNT_IS_LOCKED);
+        if (user.isLock()) throw new AppException(ErrorCode.ACCOUNT_IS_LOCKED);
         logOutToken(request);
         String accessToken = generateToken(user, false);
         String refreshToken = generateToken(user, true);
-        setRefreshTokenCookie(res,refreshToken);
+        setRefreshTokenCookie(res, refreshToken);
         return AuthenticationResponse.builder()
                 .token(accessToken)
                 .authenticated(true)
@@ -106,7 +107,7 @@ public class AuthenticationService {
                         .plus(isRefresh ? refreshableDuration : validationDuration, ChronoUnit.SECONDS)
                         .toEpochMilli()))
                 .claim("scope", isRefresh ? "" : buildScope(user.getRoles()))
-                .claim("userId",user.getId())
+                .claim("userId", user.getId())
                 .jwtID(tokenId)
                 .build();
         Payload payload = new Payload(claimsSet.toJSONObject());
@@ -141,7 +142,7 @@ public class AuthenticationService {
     }
 
     public RefreshTokenResponse refreshToken(String refreshToken) throws ParseException, JOSEException {
-        if(refreshToken == null|| refreshToken.isBlank()){
+        if (refreshToken == null || refreshToken.isBlank()) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
         SignedJWT signedJWT = SignedJWT.parse(refreshToken);
@@ -158,11 +159,11 @@ public class AuthenticationService {
         }
     }
 
-    public void setRefreshTokenCookie(HttpServletResponse res,String refreshToken){
-        ResponseCookie cookie = ResponseCookie.from("refreshToken",refreshToken)
+    public void setRefreshTokenCookie(HttpServletResponse res, String refreshToken) {
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .path("/")
-                .maxAge(30L*24*60*60)
+                .maxAge(30L * 24 * 60 * 60)
                 .sameSite("Lax")
                 .secure(false)
                 .build();
@@ -179,11 +180,12 @@ public class AuthenticationService {
                 .build();
         res.addHeader("Set-Cookie", cookie.toString());
     }
+
     @PreAuthorize("#request.userName == authentication.name")
-    public void logOut (HttpServletResponse res,AuthenticationRequest request){
+    public void logOut(HttpServletResponse res, AuthenticationRequest request) {
         var context = SecurityContextHolder.getContext();
         String userName = context.getAuthentication().getName();
-        if(userName.equals(request.getUserName())) {
+        if (userName.equals(request.getUserName())) {
             logOutToken(request);
             clearRefreshTokenCookie(res);
         }
@@ -200,36 +202,40 @@ public class AuthenticationService {
         return null;
     }
 
-    public UserResponse getMyInfo(){
+    public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String userName = context.getAuthentication().getName();
-        User user = userRepository.findByUserName(userName).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
+        User user =
+                userRepository.findByUserName(userName).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return userMapper.toUserResponse(user);
     }
 
-    public void updateMyInfo(UpdateUserRequest request){
+    public void updateMyInfo(UpdateUserRequest request) {
         var context = SecurityContextHolder.getContext();
         String userName = context.getAuthentication().getName();
-        if(userName.equals(request.getUserName())){
-            User user = userRepository.findByUserName(userName).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
-            userMapper.updateUser(user,request);
+        if (userName.equals(request.getUserName())) {
+            User user = userRepository
+                    .findByUserName(userName)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            userMapper.updateUser(user, request);
             userRepository.save(user);
         }
-
     }
 
-    public void changePassword(ChangePassWordRequest request ){
+    public void changePassword(ChangePassWordRequest request) {
         var context = SecurityContextHolder.getContext();
         String userName = context.getAuthentication().getName();
-        if(userName.equals(request.getUserName())){
-            User user = userRepository.findByUserName(userName).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
+        if (userName.equals(request.getUserName())) {
+            User user = userRepository
+                    .findByUserName(userName)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-            boolean isTruePass = passwordEncoder.matches(request.getCurrentPassword(),user.getPassword());
-            if(isTruePass){
+            boolean isTruePass = passwordEncoder.matches(request.getCurrentPassword(), user.getPassword());
+            if (isTruePass) {
                 String newPass = passwordEncoder.encode(request.getNewPassword());
                 user.setPassword(newPass);
                 userRepository.save(user);
-            }else{
+            } else {
                 throw new AppException(ErrorCode.INCORRECT_PASSWORD);
             }
         }

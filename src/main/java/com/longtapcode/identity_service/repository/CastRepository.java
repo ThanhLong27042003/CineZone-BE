@@ -1,27 +1,29 @@
 package com.longtapcode.identity_service.repository;
 
-import com.longtapcode.identity_service.entity.Cast;
-import io.lettuce.core.dynamic.annotation.Param;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.longtapcode.identity_service.entity.Cast;
+
+import io.lettuce.core.dynamic.annotation.Param;
 
 @Repository
-public interface CastRepository extends JpaRepository<Cast,Long> {
+public interface CastRepository extends JpaRepository<Cast, Long> {
     @Query("SELECT c FROM Cast c WHERE LOWER(c.name) LIKE LOWER((CONCAT('%',:keyword,'%')))")
     List<Cast> searchCasts(@Param("keyword") String keyword);
 
     @Query("""
-    SELECT DISTINCT c.id
-    FROM Movie m
-    JOIN m.casts c
-    WHERE m.id = :movieId
+	SELECT DISTINCT c.id
+	FROM Movie m
+	JOIN m.casts c
+	WHERE m.id = :movieId
 """)
     List<Long> findCastIdsByMovie(@Param("movieId") Long movieId);
+
     Page<Cast> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }
-

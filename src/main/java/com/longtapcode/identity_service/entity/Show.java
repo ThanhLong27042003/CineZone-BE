@@ -1,14 +1,16 @@
 package com.longtapcode.identity_service.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Table(name = "shows")
@@ -21,12 +23,12 @@ public class Show {
     @Id
     @Column(name = "ShowID", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     Long id;
+    Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "MovieID")
-     Movie movieID;
+    Movie movieID;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -39,7 +41,5 @@ public class Show {
 
     @NotNull
     @Column(name = "Price", nullable = false, precision = 10, scale = 2)
-     BigDecimal price;
-
-
+    BigDecimal price;
 }

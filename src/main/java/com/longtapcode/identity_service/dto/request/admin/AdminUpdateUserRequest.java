@@ -3,7 +3,6 @@ package com.longtapcode.identity_service.dto.request.admin;
 import java.time.LocalDate;
 import java.util.Set;
 
-import com.longtapcode.identity_service.entity.Role;
 import jakarta.validation.constraints.Size;
 
 import lombok.AccessLevel;
@@ -17,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 public class AdminUpdateUserRequest {
     @Size(min = 3, message = "INVALID_USERNAME")
     String userName;
+
     String firstName;
     String lastName;
     String phoneNumber;

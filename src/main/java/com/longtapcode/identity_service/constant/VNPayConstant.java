@@ -6,5 +6,6 @@ public class VNPayConstant {
     public static final String ORDER_TYPE = "other";
     public static final String LOCALE = "vn";
     public static final String CURRENCY_CODE = "VND";
-    private VNPayConstant (){}
+
+    private VNPayConstant() {}
 }

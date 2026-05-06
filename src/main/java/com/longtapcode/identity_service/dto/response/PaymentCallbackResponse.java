@@ -9,8 +9,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PaymentCallbackResponse {
-     Boolean success;
-     Long bookingId;
-     String orderId;
-     String message;
+    Boolean success;
+    Long bookingId;
+    String orderId;
+    String message;
 }

@@ -1,15 +1,17 @@
 package com.longtapcode.identity_service.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.time.LocalDateTime;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "seat_instances", uniqueConstraints = @UniqueConstraint(columnNames = {"showID","seatID"}))
+@Table(name = "seat_instances", uniqueConstraints = @UniqueConstraint(columnNames = {"showID", "seatID"}))
 @Data
 @Builder
 @NoArgsConstructor
@@ -38,5 +40,8 @@ public class SeatInstance {
     @Column(name = "holdExpiresAt")
     LocalDateTime holdExpiresAt;
 
-    public enum Status { AVAILABLE, BOOKED }
+    public enum Status {
+        AVAILABLE,
+        BOOKED
+    }
 }

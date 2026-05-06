@@ -1,25 +1,26 @@
 package com.longtapcode.identity_service.service;
 
-import com.longtapcode.identity_service.entity.Movie;
-import com.longtapcode.identity_service.entity.Show;
-import com.longtapcode.identity_service.repository.BookingRepository;
-import com.longtapcode.identity_service.repository.MovieRepository;
-import com.longtapcode.identity_service.repository.ShowRepository;
-import com.longtapcode.identity_service.repository.UserRepository;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+
+import com.longtapcode.identity_service.entity.Movie;
+import com.longtapcode.identity_service.entity.Show;
+import com.longtapcode.identity_service.repository.BookingRepository;
+import com.longtapcode.identity_service.repository.MovieRepository;
+import com.longtapcode.identity_service.repository.ShowRepository;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -32,14 +33,14 @@ public class StatsService {
     BookingRepository bookingRepository;
     StringRedisTemplate redisTemplate;
 
-
     public Map<String, Object> getCinemaStats() {
         Map<String, Object> stats = new HashMap<>();
 
         long nowShowingCount = movieRepository.count();
         stats.put("nowShowing", nowShowingCount);
 
-        LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime startOfMonth =
+                LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
         LocalDateTime endOfMonth = LocalDateTime.now();
         Long totalBooking = bookingRepository.countByDateRange(startOfMonth, endOfMonth);
         stats.put("totalBooking", totalBooking);
@@ -70,7 +71,7 @@ public class StatsService {
         LocalDateTime today = LocalDateTime.now();
         LocalDateTime endOfDay = LocalDateTime.now().withYear(2028);
 
-        Pageable pageable = PageRequest.of(0,10);
+        Pageable pageable = PageRequest.of(0, 10);
         LocalDateTime last7Days = today.minusDays(7);
         List<Object[]> topMoviesData = bookingRepository.getTopMoviesByBookings(last7Days, today, pageable);
         List<Map<String, Object>> trendingMovies = new ArrayList<>();
@@ -86,11 +87,7 @@ public class StatsService {
             Movie movie = movieOpt.get();
 
             // Get today's shows for this movie
-            List<Show> todayShows = showRepository.findByRoomAndDateRange(
-                            null,
-                            today,
-                            endOfDay
-                    ).stream()
+            List<Show> todayShows = showRepository.findByRoomAndDateRange(null, today, endOfDay).stream()
                     .filter(s -> s.getMovieID().getId().equals(movie.getId()))
                     .filter(s -> s.getShowDateTime().isAfter(today)) // only future shows
                     .sorted(Comparator.comparing(Show::getShowDateTime))
@@ -130,18 +127,15 @@ public class StatsService {
         return trendingMovies;
     }
 
-
     private int calculateAvailableSeats(Long showId) {
         Set<String> heldKeys = redisTemplate.keys("hold:" + showId + ":*");
         Set<String> bookedKeys = redisTemplate.keys("booked:" + showId + ":*");
 
         int totalSeats = 60; // Assuming 60 seats per room
-        int occupiedSeats = (heldKeys != null ? heldKeys.size() : 0) +
-                (bookedKeys != null ? bookedKeys.size() : 0);
+        int occupiedSeats = (heldKeys != null ? heldKeys.size() : 0) + (bookedKeys != null ? bookedKeys.size() : 0);
 
         return Math.max(0, totalSeats - occupiedSeats);
     }
-
 
     private String determineTrend(Long bookingCount) {
         if (bookingCount > 50) return "up";
@@ -149,13 +143,11 @@ public class StatsService {
         return "stable";
     }
 
-
     private String calculateTrendPercent(Long bookingCount) {
         if (bookingCount > 50) return "+" + (bookingCount / 2) + "%";
         if (bookingCount < 20) return "-" + (30 - bookingCount) + "%";
         return "0%";
     }
-
 
     private String determineBadge(Movie movie, Long bookingCount) {
         if (bookingCount > 50) return "Hot";
@@ -172,14 +164,14 @@ public class StatsService {
         return "Hot";
     }
 
-
     public List<Map<String, Object>> getComingSoonMovies() {
         LocalDate today = LocalDate.now();
         LocalDate futureDate = today.plusMonths(2);
 
         List<Movie> upcomingMovies = movieRepository.findAll().stream()
                 .filter(m -> m.getReleaseDate() != null)
-                .filter(m -> m.getReleaseDate().isAfter(today) && m.getReleaseDate().isBefore(futureDate))
+                .filter(m ->
+                        m.getReleaseDate().isAfter(today) && m.getReleaseDate().isBefore(futureDate))
                 .sorted(Comparator.comparing(Movie::getReleaseDate))
                 .limit(4)
                 .collect(Collectors.toList());
@@ -191,8 +183,11 @@ public class StatsService {
             movieData.put("id", movie.getId());
             movieData.put("title", movie.getTitle());
             movieData.put("date", movie.getReleaseDate().format(DateTimeFormatter.ofPattern("MMM dd, yyyy")));
-            movieData.put("genre", movie.getGenres().isEmpty() ? "Unknown" :
-                    movie.getGenres().iterator().next().getName());
+            movieData.put(
+                    "genre",
+                    movie.getGenres().isEmpty()
+                            ? "Unknown"
+                            : movie.getGenres().iterator().next().getName());
             movieData.put("preOrder", movie.getReleaseDate().isBefore(today.plusMonths(1)));
 
             result.add(movieData);
@@ -214,7 +209,6 @@ public class StatsService {
 
         return info;
     }
-
 
     public Map<String, Object> getAllStats() {
         Map<String, Object> allStats = new HashMap<>();

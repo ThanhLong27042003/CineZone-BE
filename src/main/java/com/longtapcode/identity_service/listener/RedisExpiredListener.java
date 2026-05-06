@@ -1,17 +1,19 @@
 package com.longtapcode.identity_service.listener;
 
-import com.longtapcode.identity_service.constant.SeatInstanceStatus;
-import com.longtapcode.identity_service.dto.response.SeatUpdateResponse;
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
+import com.longtapcode.identity_service.constant.SeatInstanceStatus;
+import com.longtapcode.identity_service.dto.response.SeatUpdateResponse;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -19,6 +21,7 @@ public class RedisExpiredListener implements MessageListener {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final RedisTemplate<String, String> redisTemplate;
+
     @Override
     public void onMessage(Message message, byte[] pattern) {
         String expiredKey = message.toString();
@@ -54,10 +57,6 @@ public class RedisExpiredListener implements MessageListener {
                 .expiresAt(0L)
                 .build();
 
-        messagingTemplate.convertAndSend(
-                "/topic/show/" + showId,
-                msg
-        );
+        messagingTemplate.convertAndSend("/topic/show/" + showId, msg);
     }
 }
-

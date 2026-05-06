@@ -1,15 +1,17 @@
 package com.longtapcode.identity_service.controller.admin;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.longtapcode.identity_service.dto.request.ApiResponse;
 import com.longtapcode.identity_service.dto.request.RoomRequest;
 import com.longtapcode.identity_service.dto.response.RoomResponse;
 import com.longtapcode.identity_service.service.RoomService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/admin/rooms")
@@ -40,9 +42,7 @@ public class AdminRoomController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<RoomResponse> updateRoom(
-            @PathVariable Long id,
-            @RequestBody RoomRequest request) {
+    public ApiResponse<RoomResponse> updateRoom(@PathVariable Long id, @RequestBody RoomRequest request) {
         return ApiResponse.<RoomResponse>builder()
                 .result(roomService.updateRoom(id, request))
                 .build();
@@ -51,8 +51,6 @@ public class AdminRoomController {
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteRoom(@PathVariable Long id) {
         roomService.deleteRoom(id);
-        return ApiResponse.<Void>builder()
-                .message("Room deleted successfully")
-                .build();
+        return ApiResponse.<Void>builder().message("Room deleted successfully").build();
     }
 }

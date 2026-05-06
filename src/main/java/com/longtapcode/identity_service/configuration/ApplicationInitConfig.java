@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.longtapcode.identity_service.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.longtapcode.identity_service.constant.PredefinedRole;
 import com.longtapcode.identity_service.entity.Role;
 import com.longtapcode.identity_service.entity.User;
+import com.longtapcode.identity_service.repository.BookingRepository;
 import com.longtapcode.identity_service.repository.RoleRepository;
 import com.longtapcode.identity_service.repository.UserRepository;
 
@@ -70,13 +70,13 @@ public class ApplicationInitConfig {
     }
 
     @Bean
-    public ApplicationRunner initBookedSeats(){
-        return args ->{
-                List<Object[]> redisDataList = bookingRepository.findAllByBookingConfirmed();
-                for(Object[] redisData : redisDataList){
-                    String key = "booked:"+ redisData[1] +":" +redisData[2];
-                    redisTemplate.opsForValue().setIfAbsent(key, redisData[0].toString());
-                }
+    public ApplicationRunner initBookedSeats() {
+        return args -> {
+            List<Object[]> redisDataList = bookingRepository.findAllByBookingConfirmed();
+            for (Object[] redisData : redisDataList) {
+                String key = "booked:" + redisData[1] + ":" + redisData[2];
+                redisTemplate.opsForValue().setIfAbsent(key, redisData[0].toString());
+            }
         };
     }
 }

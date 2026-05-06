@@ -1,14 +1,15 @@
 package com.longtapcode.identity_service.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
+
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Data
@@ -21,17 +22,17 @@ public class Booking {
     @Id
     @Column(name = "BookingID", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     Long id;
+    Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "id")
-     User id1;
+    User id1;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "ShowID")
-     Show showID;
+    Show showID;
 
     @Column(name = "order_id", unique = true)
     String orderId;
@@ -50,5 +51,4 @@ public class Booking {
 
     @Column(name = "booking_date")
     LocalDateTime bookingDate;
-
 }

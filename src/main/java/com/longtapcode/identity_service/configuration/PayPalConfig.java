@@ -1,11 +1,13 @@
 package com.longtapcode.identity_service.configuration;
 
-import com.paypal.core.PayPalEnvironment;
-import com.paypal.core.PayPalHttpClient;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.paypal.core.PayPalEnvironment;
+import com.paypal.core.PayPalHttpClient;
+
+import lombok.Getter;
 
 @Configuration
 @Getter
@@ -17,7 +19,7 @@ public class PayPalConfig {
     @Value("${paypal.client-secret}")
     private String clientSecret;
 
-    @Value("${paypal.mode:sandbox}")  // sandbox hoặc live
+    @Value("${paypal.mode:sandbox}") // sandbox hoặc live
     private String mode;
 
     @Value("${paypal.return-url}")

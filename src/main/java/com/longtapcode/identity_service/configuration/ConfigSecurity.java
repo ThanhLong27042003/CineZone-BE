@@ -1,5 +1,7 @@
 package com.longtapcode.identity_service.configuration;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,15 +15,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-import java.util.List;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -29,21 +29,25 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConfigSecurity {
-    static final String[] PUBLIC_GET_ENDPOINTS = {"/movie/**" ,"/show/**","/cast/**", "/seat/**","/general/**","/payment/**","/genre/**"};
-    static final String[] PUBLIC_POST_ENDPOINTS = {"/auth/log-in", "/auth/refreshToken","/user/createUser", "/seat/release"};
+    static final String[] PUBLIC_GET_ENDPOINTS = {
+        "/movie/**", "/show/**", "/cast/**", "/seat/**", "/general/**", "/payment/**", "/genre/**"
+    };
+    static final String[] PUBLIC_POST_ENDPOINTS = {
+        "/auth/log-in", "/auth/refreshToken", "/user/createUser", "/seat/release"
+    };
     CustomJwtDecoder customJwtDecoder;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
+        httpSecurity.cors(Customizer.withDefaults()).authorizeHttpRequests(request -> request.requestMatchers(
+                        HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
                 .permitAll()
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
                 .permitAll()
-                        .requestMatchers("/ws/**")
-                        .permitAll()
-                        .requestMatchers("/booking/**").authenticated()
+                .requestMatchers("/ws/**")
+                .permitAll()
+                .requestMatchers("/booking/**")
+                .authenticated()
                 .anyRequest()
                 .authenticated());
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
@@ -67,6 +71,7 @@ public class ConfigSecurity {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
     }
+
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();

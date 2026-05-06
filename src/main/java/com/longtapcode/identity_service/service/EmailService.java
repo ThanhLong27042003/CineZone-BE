@@ -1,27 +1,29 @@
 package com.longtapcode.identity_service.service;
 
-import com.longtapcode.identity_service.dto.event.BookingConfirmedEvent;
-import com.longtapcode.identity_service.dto.event.SeatInfoEvent;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import com.longtapcode.identity_service.dto.event.BookingConfirmedEvent;
+import com.longtapcode.identity_service.dto.event.SeatInfoEvent;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -43,11 +45,12 @@ public class EmailService {
     @KafkaListener(
             topics = "${spring.kafka.topics.booking-confirmed}",
             groupId = "${spring.kafka.consumer.group-id}",
-            containerFactory = "kafkaListenerContainerFactory"
-    )
+            containerFactory = "kafkaListenerContainerFactory")
     public void handleBookingConfirmed(BookingConfirmedEvent event, Acknowledgment acknowledgment) {
-        log.info("📧 Received BookingConfirmedEvent - BookingId: {}, Email: {}",
-                event.getBookingId(), event.getUserEmail());
+        log.info(
+                "📧 Received BookingConfirmedEvent - BookingId: {}, Email: {}",
+                event.getBookingId(),
+                event.getUserEmail());
 
         try {
             if (!emailEnabled) {
@@ -72,8 +75,7 @@ public class EmailService {
 
         Map<String, Object> variables = buildEmailVariables(event);
 
-        String htmlContent = templateEngine.process("email/booking-confirmation",
-                createContext(variables));
+        String htmlContent = templateEngine.process("email/booking-confirmation", createContext(variables));
 
         // Create and send email
         MimeMessage message = mailSender.createMimeMessage();
@@ -87,7 +89,6 @@ public class EmailService {
         mailSender.send(message);
         log.info("Email sent to: {}", event.getUserEmail());
     }
-
 
     private Map<String, Object> buildEmailVariables(BookingConfirmedEvent event) {
         Map<String, Object> variables = new HashMap<>();
@@ -112,11 +113,13 @@ public class EmailService {
         // Seats
         variables.put("seats", event.getSeats());
         variables.put("seatCount", event.getSeats().size());
-        variables.put("seatNumbers", event.getSeats().stream()
-                .map(SeatInfoEvent::getSeatNumber)
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("N/A"));
-        variables.put("roomName",event.getRoomName());
+        variables.put(
+                "seatNumbers",
+                event.getSeats().stream()
+                        .map(SeatInfoEvent::getSeatNumber)
+                        .reduce((a, b) -> a + ", " + b)
+                        .orElse("N/A"));
+        variables.put("roomName", event.getRoomName());
 
         // Links
         variables.put("viewBookingUrl", frontendUrl + "/my-bookings");

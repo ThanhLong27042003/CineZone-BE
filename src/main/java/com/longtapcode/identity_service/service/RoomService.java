@@ -1,5 +1,10 @@
 package com.longtapcode.identity_service.service;
 
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.longtapcode.identity_service.dto.request.RoomRequest;
 import com.longtapcode.identity_service.dto.response.RoomResponse;
 import com.longtapcode.identity_service.entity.Room;
@@ -7,14 +12,11 @@ import com.longtapcode.identity_service.exception.AppException;
 import com.longtapcode.identity_service.exception.ErrorCode;
 import com.longtapcode.identity_service.mapper.RoomMapper;
 import com.longtapcode.identity_service.repository.RoomRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,10 +32,10 @@ public class RoomService {
     }
 
     public RoomResponse getRoomById(Long id) {
-        Room room = roomRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+        Room room = roomRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
         return roomMapper.toRoomResponse(room);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public RoomResponse createRoom(RoomRequest request) {
         if (roomRepository.existsByName(request.getName())) {
@@ -46,10 +48,10 @@ public class RoomService {
         log.info("Created room: {}", room.getName());
         return roomMapper.toRoomResponse(room);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public RoomResponse updateRoom(Long id, RoomRequest request) {
-        Room room = roomRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+        Room room = roomRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
 
         roomMapper.updateRoom(room, request);
         roomRepository.save(room);
@@ -57,6 +59,7 @@ public class RoomService {
         log.info("Updated room: {}", room.getName());
         return roomMapper.toRoomResponse(room);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteRoom(Long id) {
         if (!roomRepository.existsById(id)) {

@@ -1,12 +1,12 @@
 package com.longtapcode.identity_service.dto.event;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
@@ -35,5 +35,4 @@ public class BookingConfirmedEvent implements Serializable {
     String roomName;
 
     LocalDateTime eventTime;
-
 }

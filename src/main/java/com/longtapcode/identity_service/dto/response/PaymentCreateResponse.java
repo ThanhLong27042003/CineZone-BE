@@ -1,12 +1,9 @@
 package com.longtapcode.identity_service.dto.response;
 
+import java.util.Set;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
-import java.util.Set;
-
 
 @Data
 @Builder
@@ -22,5 +19,4 @@ public class PaymentCreateResponse {
     String paymentUrl;
     String orderId;
     Long amount;
-
 }

@@ -1,36 +1,36 @@
 //
-//package com.longtapcode.identity_service.service;
+// package com.longtapcode.identity_service.service;
 //
-//import com.longtapcode.identity_service.dto.request.ShowRequest;
-//import com.longtapcode.identity_service.dto.request.UpdateShowRequest;
-//import com.longtapcode.identity_service.dto.response.ShowResponse;
-//import com.longtapcode.identity_service.entity.*;
-//import com.longtapcode.identity_service.exception.AppException;
-//import com.longtapcode.identity_service.exception.ErrorCode;
-//import com.longtapcode.identity_service.mapper.ShowMapper;
-//import com.longtapcode.identity_service.repository.*;
-//import lombok.AccessLevel;
-//import lombok.RequiredArgsConstructor;
-//import lombok.experimental.FieldDefaults;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.PageImpl;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.security.access.prepost.PreAuthorize;
-//import org.springframework.stereotype.Service;
-//import org.springframework.transaction.annotation.Transactional;
+// import com.longtapcode.identity_service.dto.request.ShowRequest;
+// import com.longtapcode.identity_service.dto.request.UpdateShowRequest;
+// import com.longtapcode.identity_service.dto.response.ShowResponse;
+// import com.longtapcode.identity_service.entity.*;
+// import com.longtapcode.identity_service.exception.AppException;
+// import com.longtapcode.identity_service.exception.ErrorCode;
+// import com.longtapcode.identity_service.mapper.ShowMapper;
+// import com.longtapcode.identity_service.repository.*;
+// import lombok.AccessLevel;
+// import lombok.RequiredArgsConstructor;
+// import lombok.experimental.FieldDefaults;
+// import lombok.extern.slf4j.Slf4j;
+// import org.springframework.data.domain.Page;
+// import org.springframework.data.domain.PageImpl;
+// import org.springframework.data.domain.PageRequest;
+// import org.springframework.data.domain.Pageable;
+// import org.springframework.security.access.prepost.PreAuthorize;
+// import org.springframework.stereotype.Service;
+// import org.springframework.transaction.annotation.Transactional;
 //
-//import java.time.LocalDate;
-//import java.time.LocalDateTime;
-//import java.util.*;
-//import java.util.stream.Collectors;
+// import java.time.LocalDate;
+// import java.time.LocalDateTime;
+// import java.util.*;
+// import java.util.stream.Collectors;
 //
-//@Service
-//@RequiredArgsConstructor
-//@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-//@Slf4j
-//public class ShowService {
+// @Service
+// @RequiredArgsConstructor
+// @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+// @Slf4j
+// public class ShowService {
 //    ShowRepository showRepository;
 //    MovieRepository movieRepository;
 //    RoomRepository roomRepository;
@@ -282,43 +282,42 @@
 //        log.info("Found {} available dates", sortedDates.size());
 //        return sortedDates;
 //    }
-//}
+// }
 
-
-//package com.longtapcode.identity_service.service;
+// package com.longtapcode.identity_service.service;
 //
-//import com.longtapcode.identity_service.dto.request.ShowRequest;
-//import com.longtapcode.identity_service.dto.request.UpdateShowRequest;
-//import com.longtapcode.identity_service.dto.response.ShowResponse;
-//import com.longtapcode.identity_service.entity.Movie;
-//import com.longtapcode.identity_service.entity.Room;
-//import com.longtapcode.identity_service.entity.Show;
-//import com.longtapcode.identity_service.exception.AppException;
-//import com.longtapcode.identity_service.exception.ErrorCode;
-//import com.longtapcode.identity_service.mapper.ShowMapper;
-//import com.longtapcode.identity_service.repository.BookingRepository;
-//import com.longtapcode.identity_service.repository.MovieRepository;
-//import com.longtapcode.identity_service.repository.RoomRepository;
-//import com.longtapcode.identity_service.repository.ShowRepository;
-//import lombok.AccessLevel;
-//import lombok.RequiredArgsConstructor;
-//import lombok.experimental.FieldDefaults;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.cglib.core.Local;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.security.access.prepost.PreAuthorize;
-//import org.springframework.stereotype.Service;
+// import com.longtapcode.identity_service.dto.request.ShowRequest;
+// import com.longtapcode.identity_service.dto.request.UpdateShowRequest;
+// import com.longtapcode.identity_service.dto.response.ShowResponse;
+// import com.longtapcode.identity_service.entity.Movie;
+// import com.longtapcode.identity_service.entity.Room;
+// import com.longtapcode.identity_service.entity.Show;
+// import com.longtapcode.identity_service.exception.AppException;
+// import com.longtapcode.identity_service.exception.ErrorCode;
+// import com.longtapcode.identity_service.mapper.ShowMapper;
+// import com.longtapcode.identity_service.repository.BookingRepository;
+// import com.longtapcode.identity_service.repository.MovieRepository;
+// import com.longtapcode.identity_service.repository.RoomRepository;
+// import com.longtapcode.identity_service.repository.ShowRepository;
+// import lombok.AccessLevel;
+// import lombok.RequiredArgsConstructor;
+// import lombok.experimental.FieldDefaults;
+// import lombok.extern.slf4j.Slf4j;
+// import org.springframework.cglib.core.Local;
+// import org.springframework.data.domain.Page;
+// import org.springframework.data.domain.PageRequest;
+// import org.springframework.data.domain.Pageable;
+// import org.springframework.security.access.prepost.PreAuthorize;
+// import org.springframework.stereotype.Service;
 //
-//import java.time.LocalDateTime;
-//import java.util.List;
+// import java.time.LocalDateTime;
+// import java.util.List;
 //
-//@Service
-//@RequiredArgsConstructor
-//@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-//@Slf4j
-//public class ShowService {
+// @Service
+// @RequiredArgsConstructor
+// @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+// @Slf4j
+// public class ShowService {
 //    ShowRepository showRepository;
 //    ShowMapper showMapper;
 //    MovieRepository movieRepository;
@@ -467,8 +466,20 @@
 //        List<Show> shows = showRepository.findByRoomAndDateRange(roomId, startDate, endDate);
 //        return showMapper.toListShowResponse(shows);
 //    }
-//}
+// }
 package com.longtapcode.identity_service.service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.longtapcode.identity_service.dto.request.ShowRequest;
 import com.longtapcode.identity_service.dto.request.UpdateShowRequest;
@@ -478,21 +489,11 @@ import com.longtapcode.identity_service.exception.AppException;
 import com.longtapcode.identity_service.exception.ErrorCode;
 import com.longtapcode.identity_service.mapper.ShowMapper;
 import com.longtapcode.identity_service.repository.*;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -520,8 +521,7 @@ public class ShowService {
 
     public ShowResponse getShowById(Long id) {
         LocalDateTime now = LocalDateTime.now();
-        Show show = showRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
+        Show show = showRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
 
         // Kiểm tra nếu show đã chiếu
         if (show.getShowDateTime().isBefore(now)) {
@@ -533,11 +533,11 @@ public class ShowService {
 
     public List<ShowResponse> getAllShowByMovieId(Long movieId) {
         LocalDateTime now = LocalDateTime.now();
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+        Movie movie =
+                movieRepository.findById(movieId).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
 
-        List<Show> shows = showRepository.findByMovieID(movie)
-                .orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
+        List<Show> shows =
+                showRepository.findByMovieID(movie).orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
 
         // Chỉ lấy show chưa chiếu
         List<Show> upcomingShows = shows.stream()
@@ -551,7 +551,8 @@ public class ShowService {
     // ==================== ADMIN METHODS - LẤY TẤT CẢ SHOW ====================
 
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<ShowResponse> getAllShowsForAdmin(int page, int size, Long movieId, LocalDateTime startDate, LocalDateTime endDate) {
+    public Page<ShowResponse> getAllShowsForAdmin(
+            int page, int size, Long movieId, LocalDateTime startDate, LocalDateTime endDate) {
         Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
         Page<Show> shows = showRepository.findShowsWithFilters(movieId, startDate, endDate, pageable);
 
@@ -587,10 +588,12 @@ public class ShowService {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void createShow(ShowRequest request) {
-        Movie movie = movieRepository.findById(request.getMovieId())
+        Movie movie = movieRepository
+                .findById(request.getMovieId())
                 .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
 
-        Room room = roomRepository.findById(request.getRoomId())
+        Room room = roomRepository
+                .findById(request.getRoomId())
                 .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_EXISTED));
 
         LocalDateTime showDateTime = LocalDateTime.of(request.getShowDate(), request.getShowTime());
@@ -604,12 +607,8 @@ public class ShowService {
         LocalDateTime startDateTime = showDateTime;
         LocalDateTime endDateTime = showDateTime.plusMinutes(movie.getRuntime());
 
-        Long overlappingCount = showRepository.countOverlappingShow(
-                request.getRoomId(),
-                startDateTime,
-                endDateTime,
-                null
-        );
+        Long overlappingCount =
+                showRepository.countOverlappingShow(request.getRoomId(), startDateTime, endDateTime, null);
 
         if (overlappingCount > 0) {
             throw new AppException(ErrorCode.SHOW_OVERLAP);
@@ -624,18 +623,19 @@ public class ShowService {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void updateShow(Long showId, UpdateShowRequest request) {
-        Show show = showRepository.findById(showId)
-                .orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
+        Show show = showRepository.findById(showId).orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
 
         boolean hasBookings = bookingRepository.existsByShowID(show);
         if (hasBookings) {
             throw new AppException(ErrorCode.SHOW_HAS_BOOKINGS);
         }
 
-        Movie movie = movieRepository.findById(request.getMovieId())
+        Movie movie = movieRepository
+                .findById(request.getMovieId())
                 .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
 
-        Room room = roomRepository.findById(request.getRoomId())
+        Room room = roomRepository
+                .findById(request.getRoomId())
                 .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_EXISTED));
 
         LocalDateTime newShowDateTime = LocalDateTime.of(request.getShowDate(), request.getShowTime());
@@ -644,12 +644,8 @@ public class ShowService {
         LocalDateTime startDateTime = newShowDateTime;
         LocalDateTime endDateTime = newShowDateTime.plusMinutes(movie.getRuntime());
 
-        Long overlappingCount = showRepository.countOverlappingShow(
-                request.getRoomId(),
-                startDateTime,
-                endDateTime,
-                showId
-        );
+        Long overlappingCount =
+                showRepository.countOverlappingShow(request.getRoomId(), startDateTime, endDateTime, showId);
 
         if (overlappingCount > 0) {
             throw new AppException(ErrorCode.SHOW_OVERLAP);
@@ -664,8 +660,7 @@ public class ShowService {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteShow(Long showId) {
-        Show show = showRepository.findById(showId)
-                .orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
+        Show show = showRepository.findById(showId).orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
 
         boolean hasBookings = bookingRepository.existsByShowID(show);
         if (hasBookings) {
@@ -682,11 +677,7 @@ public class ShowService {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(23, 59, 59);
 
-        List<Show> shows = showRepository.findByRoomAndDateRange(
-                null,
-                startOfDay,
-                endOfDay
-        );
+        List<Show> shows = showRepository.findByRoomAndDateRange(null, startOfDay, endOfDay);
 
         // Lọc chỉ lấy show chưa chiếu
         List<Show> upcomingShows = shows.stream()
@@ -697,15 +688,13 @@ public class ShowService {
         // Nhóm theo phim
         Map<String, List<ShowResponse>> groupedByMovie = upcomingShows.stream()
                 .map(showMapper::toShowResponse)
-                .collect(Collectors.groupingBy(
-                        response -> {
-                            Show show = shows.stream()
-                                    .filter(s -> s.getId().equals(response.getShowId()))
-                                    .findFirst()
-                                    .orElse(null);
-                            return show != null ? show.getMovieID().getTitle() : "Unknown";
-                        }
-                ));
+                .collect(Collectors.groupingBy(response -> {
+                    Show show = shows.stream()
+                            .filter(s -> s.getId().equals(response.getShowId()))
+                            .findFirst()
+                            .orElse(null);
+                    return show != null ? show.getMovieID().getTitle() : "Unknown";
+                }));
 
         log.info("Found {} movies with shows on {}", groupedByMovie.size(), date);
         return groupedByMovie;
@@ -720,10 +709,9 @@ public class ShowService {
 
         List<Show> shows;
         if (movieId != null) {
-            Movie movie = movieRepository.findById(movieId)
-                    .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
-            shows = showRepository.findByMovieID(movie)
-                    .orElse(Collections.emptyList());
+            Movie movie =
+                    movieRepository.findById(movieId).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+            shows = showRepository.findByMovieID(movie).orElse(Collections.emptyList());
         } else {
             shows = showRepository.findByRoomAndDateRange(null, now, futureDate);
         }

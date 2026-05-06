@@ -3,10 +3,6 @@ package com.longtapcode.identity_service.service;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.longtapcode.identity_service.dto.request.admin.AdminUpdateUserRequest;
-import com.longtapcode.identity_service.entity.Movie;
-import com.longtapcode.identity_service.repository.MovieRepository;
-import com.longtapcode.identity_service.repository.RoleRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,12 +13,16 @@ import org.springframework.stereotype.Service;
 import com.longtapcode.identity_service.constant.PredefinedRole;
 import com.longtapcode.identity_service.dto.request.CreationUserRequest;
 import com.longtapcode.identity_service.dto.request.UpdateUserRequest;
+import com.longtapcode.identity_service.dto.request.admin.AdminUpdateUserRequest;
 import com.longtapcode.identity_service.dto.response.UserResponse;
+import com.longtapcode.identity_service.entity.Movie;
 import com.longtapcode.identity_service.entity.Role;
 import com.longtapcode.identity_service.entity.User;
 import com.longtapcode.identity_service.exception.AppException;
 import com.longtapcode.identity_service.exception.ErrorCode;
 import com.longtapcode.identity_service.mapper.UserMapper;
+import com.longtapcode.identity_service.repository.MovieRepository;
+import com.longtapcode.identity_service.repository.RoleRepository;
 import com.longtapcode.identity_service.repository.UserRepository;
 
 import lombok.AccessLevel;
@@ -38,30 +38,33 @@ public class UserService {
     PasswordEncoder passwordEncoder;
     private final MovieRepository movieRepository;
     private final RoleRepository roleRepository;
+
     @PreAuthorize("hasRole('ADMIN')")
     public void updateUserService(String id, UpdateUserRequest request) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         userMapper.updateUser(user, request);
         userRepository.save(user);
     }
-    @PreAuthorize("#userId == authentication.principal.claims['userId']")
-    public void addFavoriteMovie(String userId, Long movieId){
-        User user = userRepository.findById(userId).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED));
-        Movie movie = movieRepository.findById(movieId).orElseThrow(()->new AppException(ErrorCode.MOVIE_NOT_EXISTED));
-            user.getFavoriteMovies().add(movie);
-            userRepository.save(user);
-    }
-    @PreAuthorize("#userId == authentication.principal.claims['userId']")
-    public void removeFavoriteMovie(String userId, Long movieId){
-        User user = userRepository.findById(userId).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
-        user.getFavoriteMovies().removeIf(m -> m.getId().equals(movieId));
-            userRepository.save(user);
 
+    @PreAuthorize("#userId == authentication.principal.claims['userId']")
+    public void addFavoriteMovie(String userId, Long movieId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        Movie movie =
+                movieRepository.findById(movieId).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+        user.getFavoriteMovies().add(movie);
+        userRepository.save(user);
+    }
+
+    @PreAuthorize("#userId == authentication.principal.claims['userId']")
+    public void removeFavoriteMovie(String userId, Long movieId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.getFavoriteMovies().removeIf(m -> m.getId().equals(movieId));
+        userRepository.save(user);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public Page<UserResponse> getAllUsersForAdmin(int page, int size) {
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = PageRequest.of(page, size);
         Page<User> users = userRepository.findAll(pageable);
         return users.map(userMapper::toUserResponse);
     }
@@ -81,10 +84,10 @@ public class UserService {
         userRepository.save(user);
         return userMapper.toUserResponse(user);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse updateUser(String userId, AdminUpdateUserRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         userMapper.adminUpdateUser(user, request);
 
@@ -95,19 +98,21 @@ public class UserService {
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getUserById(String id) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return userMapper.toUserResponse(user);
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     public String lockUser(String id) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         user.toggleLock();
         userRepository.save(user);
-        if(user.isLock()){
+        if (user.isLock()) {
             return "This account is locked";
-        }else{
+        } else {
             return "This account is unlocked";
         }
     }

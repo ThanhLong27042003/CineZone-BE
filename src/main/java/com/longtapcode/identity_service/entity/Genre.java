@@ -3,6 +3,7 @@ package com.longtapcode.identity_service.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,11 +18,10 @@ public class Genre {
     @Id
     @Column(name = "GenreID", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     Long id;
+    Long id;
 
     @Size(max = 100)
     @NotNull
     @Column(name = "Name", nullable = false, length = 100)
-     String name;
-
+    String name;
 }

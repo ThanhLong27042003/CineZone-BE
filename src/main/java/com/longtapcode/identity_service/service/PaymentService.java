@@ -1,19 +1,11 @@
 package com.longtapcode.identity_service.service;
 
-import com.longtapcode.identity_service.dto.event.BookingConfirmedEvent;
-import com.longtapcode.identity_service.dto.event.SeatInfoEvent;
-import com.longtapcode.identity_service.dto.request.PaymentCreateRequest;
-import com.longtapcode.identity_service.dto.response.PaymentCallbackResponse;
-import com.longtapcode.identity_service.dto.response.PaymentCreateResponse;
-import com.longtapcode.identity_service.dto.response.SeatResponse;
-import com.longtapcode.identity_service.entity.*;
-import com.longtapcode.identity_service.constant.SeatInstanceStatus;
-import com.longtapcode.identity_service.exception.AppException;
-import com.longtapcode.identity_service.exception.ErrorCode;
-import com.longtapcode.identity_service.repository.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
+
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,9 +13,20 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.*;
+import com.longtapcode.identity_service.constant.SeatInstanceStatus;
+import com.longtapcode.identity_service.dto.event.BookingConfirmedEvent;
+import com.longtapcode.identity_service.dto.event.SeatInfoEvent;
+import com.longtapcode.identity_service.dto.request.PaymentCreateRequest;
+import com.longtapcode.identity_service.dto.response.PaymentCallbackResponse;
+import com.longtapcode.identity_service.dto.response.PaymentCreateResponse;
+import com.longtapcode.identity_service.dto.response.SeatResponse;
+import com.longtapcode.identity_service.entity.*;
+import com.longtapcode.identity_service.exception.AppException;
+import com.longtapcode.identity_service.exception.ErrorCode;
+import com.longtapcode.identity_service.repository.*;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -47,12 +50,16 @@ public class PaymentService {
     @PreAuthorize("#request.userId == authentication.principal.claims['userId']")
     @Transactional
     public PaymentCreateResponse createPayment(PaymentCreateRequest request, HttpServletRequest httpRequest) {
-        log.info("Creating payment - Method: {}, ShowId: {}, User: {}",
-                request.getPaymentMethod(), request.getShowId(), request.getUserId());
+        log.info(
+                "Creating payment - Method: {}, ShowId: {}, User: {}",
+                request.getPaymentMethod(),
+                request.getShowId(),
+                request.getUserId());
 
         validateSeatsHeld(request);
 
-        Show show = showRepository.findById(request.getShowId())
+        Show show = showRepository
+                .findById(request.getShowId())
                 .orElseThrow(() -> new AppException(ErrorCode.SHOW_NOT_EXISTED));
 
         if (show.getShowDateTime().isBefore(LocalDateTime.now())) {
@@ -60,7 +67,8 @@ public class PaymentService {
         }
 
         String orderId = UUID.randomUUID().toString();
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository
+                .findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Booking pendingBooking = Booking.builder()
@@ -92,8 +100,8 @@ public class PaymentService {
         }
 
         // Lưu bookingId vào metadata
-        String metadataKey = request.getPaymentMethod().toLowerCase() + "_metadata:" +
-                (request.getPaymentMethod().equalsIgnoreCase("vnpay") ? orderId : response.getOrderId());
+        String metadataKey = request.getPaymentMethod().toLowerCase() + "_metadata:"
+                + (request.getPaymentMethod().equalsIgnoreCase("vnpay") ? orderId : response.getOrderId());
         redisTemplate.opsForHash().put(metadataKey, "bookingId", String.valueOf(pendingBooking.getId()));
 
         return response;
@@ -132,7 +140,8 @@ public class PaymentService {
         String orderId = (String) paymentResult.get("orderId");
         String transactionId = (String) paymentResult.get("transactionId");
 
-        Booking booking = bookingRepository.findByOrderId(orderId)
+        Booking booking = bookingRepository
+                .findByOrderId(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
 
         if (!success) {
@@ -151,8 +160,7 @@ public class PaymentService {
         String userId = (String) paymentResult.get("userId");
         String[] seatNumbers = (String[]) paymentResult.get("seats");
         Long amountCents = (Long) paymentResult.get("amount");
-        BigDecimal amount = BigDecimal.valueOf(amountCents)
-                .divide(BigDecimal.valueOf(100));
+        BigDecimal amount = BigDecimal.valueOf(amountCents).divide(BigDecimal.valueOf(100));
 
         User user = booking.getId1();
         Show show = booking.getShowID();
@@ -171,10 +179,9 @@ public class PaymentService {
             redisTemplate.opsForValue().set(bookedKey, userId);
             redisTemplate.delete(holdKey);
             SeatResponse seatResponse = seatService.getSeatBySeatNumber(seatNumber);
-            BigDecimal multiplier =
-                    seatResponse.getVip() == 1 ? new BigDecimal("1.3") :
-                            seatResponse.getVip() == 2 ? new BigDecimal("1.1") :
-                                    BigDecimal.ONE;
+            BigDecimal multiplier = seatResponse.getVip() == 1
+                    ? new BigDecimal("1.3")
+                    : seatResponse.getVip() == 2 ? new BigDecimal("1.1") : BigDecimal.ONE;
 
             BookingDetail bookingDetail = BookingDetail.builder()
                     .bookingID(booking)
@@ -199,14 +206,12 @@ public class PaymentService {
                 .build();
     }
 
-    private void publishBookingConfirmedEvent(Booking booking, Show show, User user,
-                                              String[] seatNumbers, Map<String, Object> paymentResult) {
+    private void publishBookingConfirmedEvent(
+            Booking booking, Show show, User user, String[] seatNumbers, Map<String, Object> paymentResult) {
         try {
             Set<SeatInfoEvent> seats = new HashSet<>();
             for (String seatNumber : seatNumbers) {
-                seats.add(SeatInfoEvent.builder()
-                        .seatNumber(seatNumber)
-                        .build());
+                seats.add(SeatInfoEvent.builder().seatNumber(seatNumber).build());
             }
 
             BookingConfirmedEvent event = BookingConfirmedEvent.builder()
@@ -265,10 +270,8 @@ public class PaymentService {
     public void cancelExpiredPaymentProcessing() {
         LocalDateTime thirtyMinutesAgo = LocalDateTime.now().minusMinutes(30);
 
-        List<Booking> expiredBookings = bookingRepository.findByStatusAndBookingDateBefore(
-                "PAYMENT_PROCESSING",
-                thirtyMinutesAgo
-        );
+        List<Booking> expiredBookings =
+                bookingRepository.findByStatusAndBookingDateBefore("PAYMENT_PROCESSING", thirtyMinutesAgo);
 
         for (Booking booking : expiredBookings) {
             log.info("Cancelling expired booking: {}", booking.getId());
