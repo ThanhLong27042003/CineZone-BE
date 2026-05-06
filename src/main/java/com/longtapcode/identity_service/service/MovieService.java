@@ -48,13 +48,16 @@ public class MovieService {
 
     public List<List<MovieResponse>> getTopMovieForHomePage(List<String> genres) {
         List<List<MovieResponse>> homePageMovieList = new ArrayList<>();
+        Pageable top10 = PageRequest.of(0, 10);
 
         genres.forEach(genre -> {
             if (genre.equals("voteCount")) {
-                List<Movie> movies = movieRepository.findTop10ByOrderByVoteCountDesc();
+                List<Movie> movies = movieRepository
+                        .findTop10WithGenresAndCastsOrderByVoteCountDesc(top10);
                 homePageMovieList.add(movieMapper.toListMovieResponse(movies));
             } else {
-                List<Movie> movies = movieRepository.findTop10ByGenres_NameOrderByIdDesc(genre);
+                List<Movie> movies = movieRepository
+                        .findTop10WithGenresAndCastsByGenreName(genre, top10);
                 homePageMovieList.add(movieMapper.toListMovieResponse(movies));
             }
         });
