@@ -52,12 +52,10 @@ public class MovieService {
 
         genres.forEach(genre -> {
             if (genre.equals("voteCount")) {
-                List<Movie> movies = movieRepository
-                        .findTop10WithGenresAndCastsOrderByVoteCountDesc(top10);
+                List<Movie> movies = movieRepository.findTop10WithGenresAndCastsOrderByVoteCountDesc(top10);
                 homePageMovieList.add(movieMapper.toListMovieResponse(movies));
             } else {
-                List<Movie> movies = movieRepository
-                        .findTop10WithGenresAndCastsByGenreName(genre, top10);
+                List<Movie> movies = movieRepository.findTop10WithGenresAndCastsByGenreName(genre, top10);
                 homePageMovieList.add(movieMapper.toListMovieResponse(movies));
             }
         });

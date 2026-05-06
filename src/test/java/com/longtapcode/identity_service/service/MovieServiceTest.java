@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
 
 import com.longtapcode.identity_service.dto.request.admin.MovieRequest;
 import com.longtapcode.identity_service.dto.request.admin.UpdateMovieRequest;
@@ -134,7 +133,8 @@ class MovieServiceTest {
         @Test
         @DisplayName("Success - voteCount genre returns top voted movies")
         void getTopMovieForHomePage_VoteCount() {
-            when(movieRepository.findTop10WithGenresAndCastsOrderByVoteCountDesc(any(Pageable.class))).thenReturn(List.of(movie));
+            when(movieRepository.findTop10WithGenresAndCastsOrderByVoteCountDesc(any(Pageable.class)))
+                    .thenReturn(List.of(movie));
             when(movieMapper.toListMovieResponse(anyList())).thenReturn(List.of(movieResponse));
 
             List<List<MovieResponse>> result = movieService.getTopMovieForHomePage(List.of("voteCount"));
@@ -146,7 +146,8 @@ class MovieServiceTest {
         @Test
         @DisplayName("Success - specific genre returns filtered movies")
         void getTopMovieForHomePage_SpecificGenre() {
-            when(movieRepository.findTop10WithGenresAndCastsByGenreName(eq("Action"),any(Pageable.class))).thenReturn(List.of(movie));
+            when(movieRepository.findTop10WithGenresAndCastsByGenreName(eq("Action"), any(Pageable.class)))
+                    .thenReturn(List.of(movie));
             when(movieMapper.toListMovieResponse(anyList())).thenReturn(List.of(movieResponse));
 
             List<List<MovieResponse>> result = movieService.getTopMovieForHomePage(List.of("Action"));
@@ -157,8 +158,10 @@ class MovieServiceTest {
         @Test
         @DisplayName("Success - multiple genres return multiple lists")
         void getTopMovieForHomePage_MultipleGenres() {
-            when(movieRepository.findTop10WithGenresAndCastsOrderByVoteCountDesc(any(Pageable.class))).thenReturn(List.of(movie));
-            when(movieRepository.findTop10WithGenresAndCastsByGenreName(eq("Action"),any(Pageable.class))).thenReturn(List.of(movie));
+            when(movieRepository.findTop10WithGenresAndCastsOrderByVoteCountDesc(any(Pageable.class)))
+                    .thenReturn(List.of(movie));
+            when(movieRepository.findTop10WithGenresAndCastsByGenreName(eq("Action"), any(Pageable.class)))
+                    .thenReturn(List.of(movie));
             when(movieMapper.toListMovieResponse(anyList())).thenReturn(List.of(movieResponse));
 
             List<List<MovieResponse>> result = movieService.getTopMovieForHomePage(List.of("voteCount", "Action"));
