@@ -164,8 +164,8 @@ public class AuthenticationService {
                 .httpOnly(true)
                 .path("/")
                 .maxAge(30L * 24 * 60 * 60)
-                .sameSite("Lax")
-                .secure(false)
+                .sameSite("None")
+                .secure(true)
                 .build();
         res.addHeader("Set-Cookie", cookie.toString());
     }
@@ -175,8 +175,8 @@ public class AuthenticationService {
                 .httpOnly(true)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lax")
-                .secure(false)
+                .sameSite("None")
+                .secure(true)
                 .build();
         res.addHeader("Set-Cookie", cookie.toString());
     }
