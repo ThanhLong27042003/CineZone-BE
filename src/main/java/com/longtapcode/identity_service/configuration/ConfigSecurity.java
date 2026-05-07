@@ -76,7 +76,7 @@ public class ConfigSecurity {
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173","https://cine-zone-fe.vercel.app"));
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173", "https://cine-zone-fe.vercel.app"));
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.setAllowCredentials(true);
