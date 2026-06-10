@@ -19,4 +19,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // Prefix cho các message từ client → server
         config.setApplicationDestinationPrefixes("/app");
     }
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
+    }
 }
