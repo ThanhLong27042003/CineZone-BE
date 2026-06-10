@@ -30,7 +30,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConfigSecurity {
     static final String[] PUBLIC_GET_ENDPOINTS = {
-        "/movie/**", "/show/**", "/cast/**", "/seat/**", "/general/**", "/payment/**", "/genre/**", "/actuator/**"
+        "/movie/**", "/show/**", "/cast/**", "/seat/**", "/general/**", "/payment/**", "/genre/**"
     };
     static final String[] PUBLIC_POST_ENDPOINTS = {
         "/auth/log-in", "/auth/refreshToken", "/user/createUser", "/seat/release"
@@ -45,6 +45,8 @@ public class ConfigSecurity {
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
                 .permitAll()
                 .requestMatchers("/ws/**")
+                .permitAll()
+                .requestMatchers("/actuator/**")
                 .permitAll()
                 .requestMatchers("/booking/**")
                 .authenticated()
