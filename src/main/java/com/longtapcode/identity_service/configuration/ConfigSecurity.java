@@ -39,8 +39,8 @@ public class ConfigSecurity {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.cors(Customizer.withDefaults()).authorizeHttpRequests(request -> request.requestMatchers(
-                        HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
+        httpSecurity.cors(Customizer.withDefaults()).authorizeHttpRequests(request -> request
+                .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
                 .permitAll()
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
                 .permitAll()
